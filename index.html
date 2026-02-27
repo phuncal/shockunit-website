@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOCKUNIT — Anime is a language.</title>
+<meta name="description" content="A professional 2D animation studio based in Beijing. Animation · Game Dev · Original IP.">
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="SHOCKUNIT">
+<meta id="og-title"       property="og:title"       content="SHOCKUNIT — Anime is a language.">
+<meta id="og-description" property="og:description" content="A professional 2D animation studio based in Beijing. Animation · Game Dev · Original IP.">
+<meta id="og-image"       property="og:image"       content="images/hero-poster.jpg">
+<meta id="og-url"         property="og:url"         content="https://shockunit.xyz">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:site"        content="@shockunitstudio">
+<meta id="tw-title"       name="twitter:title"       content="SHOCKUNIT — Anime is a language.">
+<meta id="tw-image"       name="twitter:image"       content="images/hero-poster.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@400;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   COLOR SYSTEM
+════════════════════════════════════════ */
+:root {
+  --nebula:      #DCE4E0;
+  --nebula-dark: #c8d4cf;
+  --bc:          #382D45;   /* blackcurrant */
+  --bc-dim:      rgba(56,45,69,0.55);
+  --bc-faint:    rgba(56,45,69,0.08);
+  --red:         #D03C37;   /* persian red */
+  --red-dim:     rgba(208,60,55,0.15);
+  --white:       #F8F6F3;
+
+  /* Game page */
+  --g-bg:        #0c0c18;
+  --g-nepal:     #90AFBD;
+  --g-crimson:   #EB1013;
+  --g-text:      #dde8ee;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--nebula);
+  color: var(--bc);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ════════════════════════════════════════
+   GRAIN
+════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 9000;
+}
+
+/* ════════════════════════════════════════
+   CURSOR
+════════════════════════════════════════ */
+.cur-dot {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--red); border-radius: 50%;
+  pointer-events: none; z-index: 9990;
+  transform: translate(-50%,-50%);
+  transition: transform .12s ease, opacity .2s;
+}
+.cur-ring {
+  position: fixed; width: 32px; height: 32px;
+  border: 1.5px solid var(--bc); border-radius: 50%;
+  pointer-events: none; z-index: 9989;
+  transform: translate(-50%,-50%);
+  transition: width .3s, height .3s, border-color .3s, opacity .3s;
+}
+.cur-trail {
+  position: fixed; pointer-events: none; z-index: 9988;
+}
+.cur-trail span {
+  position: absolute; width: 3px; height: 3px;
+  background: var(--red); border-radius: 50%;
+  transform: translate(-50%,-50%);
+  transition: opacity .6s;
+}
+body.on-game .cur-dot   { background: var(--g-crimson); }
+body.on-game .cur-ring  { border-color: var(--g-nepal); }
+
+/* ════════════════════════════════════════
+   PAGE TRANSITION CURTAIN
+════════════════════════════════════════ */
+#curtain {
+  position: fixed; inset: 0;
+  background: var(--red);
+  z-index: 8000;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  pointer-events: none;
+}
+#curtain.in  { animation: curtainIn  .45s cubic-bezier(.76,0,.24,1) forwards; }
+#curtain.out { animation: curtainOut .45s cubic-bezier(.76,0,.24,1) forwards; }
+@keyframes curtainIn  { from{transform:scaleY(0);transform-origin:bottom} to{transform:scaleY(1);transform-origin:bottom} }
+@keyframes curtainOut { from{transform:scaleY(1);transform-origin:top}    to{transform:scaleY(0);transform-origin:top}    }
+
+/* ════════════════════════════════════════
+   LOADER
+════════════════════════════════════════ */
+#loader {
+  position: fixed; inset: 0; background: var(--red);
+  z-index: 99999; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  transition: opacity .7s ease, visibility .7s ease;
+}
+#loader.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+.ld-logo { font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:.5em; color: var(--white); }
+.ld-track { width:140px; height:1px; background:rgba(248,246,243,.25); overflow:hidden; position:relative; }
+.ld-bar   { position:absolute; top:0; left:0; height:100%; background:var(--white); animation:ldBar 1.6s ease-out forwards; }
+@keyframes ldBar { from{width:0} to{width:100%} }
+
+/* ════════════════════════════════════════
+   NAV
+════════════════════════════════════════ */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  height: 68px; padding: 0 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--bc-faint);
+  background: rgba(220,228,224,.88);
+  backdrop-filter: blur(12px);
+  transition: background .3s;
+}
+body.on-game nav { background: rgba(12,12,24,.9); border-color: rgba(144,175,189,.1); }
+
+.nav-logo {
+  font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:.14em;
+  color: var(--bc); text-decoration:none; display:flex; align-items:center; gap:10px; cursor:none;
+}
+body.on-game .nav-logo { color: var(--g-text); }
+.nav-mark {
+  height:32px; width:auto; display:block; object-fit:contain;
+}
+
+.nav-links { display:flex; gap:36px; list-style:none; }
+.nav-links a {
+  font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--bc-dim); text-decoration:none; transition:color .2s; cursor:none;
+  position:relative;
+}
+body.on-game .nav-links a { color: rgba(144,175,189,.6); }
+.nav-links a::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1px; background:var(--red); transition:width .3s; }
+.nav-links a:hover, .nav-links a.active { color: var(--bc); }
+body.on-game .nav-links a:hover, body.on-game .nav-links a.active { color: var(--g-text); }
+.nav-links a:hover::after, .nav-links a.active::after { width:100%; }
+
+.lang-toggle {
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.2em;
+  display:flex; align-items:center; gap:0; cursor:none;
+}
+.lang-btn {
+  padding:6px 10px; color:var(--bc-dim); background:none; border:none;
+  font-family:inherit; font-size:inherit; letter-spacing:inherit;
+  cursor:none; transition:color .2s;
+}
+body.on-game .lang-btn { color: rgba(144,175,189,.5); }
+.lang-btn.active { color: var(--red); font-weight:500; }
+.lang-sep { color: var(--bc-faint); }
+
+/* ════════════════════════════════════════
+   PAGES
+════════════════════════════════════════ */
+.page { display:none; min-height:100vh; padding-top:68px; }
+.page.active { display:block; }
+
+/* ════════════════════════════════════════
+   HOME
+════════════════════════════════════════ */
+#home.page { padding-top:0; }
+.home-wrap { height:100vh; position:relative; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; }
+
+/* Left panel */
+.home-left {
+  display:flex; flex-direction:column; justify-content:center;
+  padding: 100px 56px 80px 48px; position:relative; z-index:2;
+}
+.home-eyebrow {
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.3em;
+  color:var(--red); text-transform:uppercase; margin-bottom:28px;
+  display:flex; align-items:center; gap:14px;
+}
+.home-eyebrow::before { content:''; display:block; width:28px; height:1px; background:var(--red); }
+
+.home-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(72px,9vw,130px); line-height:.88;
+  color:var(--bc); letter-spacing:.01em; margin-bottom:28px;
+}
+.home-title em { color:var(--red); font-style:normal; display:block; }
+
+.home-tagline {
+  font-family:'Barlow Condensed',sans-serif; font-size:18px;
+  font-weight:600; letter-spacing:.08em; color:var(--bc-dim);
+  text-transform:uppercase; margin-bottom:48px;
+  padding-bottom:48px; border-bottom:1px solid var(--bc-faint);
+}
+
+.home-actions { display:flex; gap:16px; flex-wrap:wrap; }
+
+.home-meta {
+  position:absolute; bottom:40px; left:48px;
+  display:flex; gap:40px;
+}
+.hm-stat .n {
+  font-family:'Bebas Neue',sans-serif; font-size:32px;
+  color:var(--red); line-height:1;
+}
+.hm-stat .l {
+  font-family:'Space Mono',monospace; font-size:8px;
+  letter-spacing:.2em; color:var(--bc-dim); text-transform:uppercase; margin-top:4px;
+}
+
+/* Right panel — poster */
+.home-right { position:relative; overflow:hidden; cursor:none; }
+.home-right::before {
+  content:''; position:absolute; inset:0; z-index:2;
+  background: linear-gradient(to right, var(--nebula) 0%, transparent 30%);
+}
+.poster-img {
+  width:100%; height:100%; object-fit:cover; position:absolute; inset:0;
+  transition:transform .8s cubic-bezier(.25,.46,.45,.94);
+}
+.home-right:hover .poster-img { transform:scale(1.03); }
+.poster-placeholder {
+  width:100%; height:100%;
+  background: linear-gradient(135deg, #0c0c18 0%, #1a0e2a 30%, #12182a 60%, #0c0c18 100%);
+  display:flex; align-items:center; justify-content:center; position:absolute; inset:0;
+}
+.poster-overlay {
+  position:absolute; inset:0; z-index:3;
+  background: linear-gradient(to top, rgba(12,12,24,.85) 0%, transparent 50%);
+}
+.poster-info {
+  position:absolute; bottom:0; left:0; right:0; z-index:4;
+  padding:40px 40px 40px;
+}
+.poster-label-tag {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.35em;
+  color: var(--g-nepal); text-transform:uppercase; margin-bottom:12px;
+}
+.poster-game-title {
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(32px,4vw,54px);
+  color:var(--white); line-height:.95; letter-spacing:.04em; margin-bottom:10px;
+  white-space:pre-line;
+}
+.poster-game-sub {
+  font-size:12px; color:rgba(255,255,255,.45); letter-spacing:.08em;
+}
+.poster-click-hint {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  z-index:5; width:64px; height:64px;
+  border:1.5px solid rgba(144,175,189,.5); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:all .4s;
+  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em;
+  color:var(--g-nepal); text-align:center; text-transform:uppercase;
+}
+.home-right:hover .poster-click-hint { opacity:1; }
+
+/* Film corners on poster */
+.film-c { position:absolute; width:32px; height:32px; z-index:4; }
+.film-c.tl { top:24px; left:24px; border-top:1px solid rgba(144,175,189,.35); border-left:1px solid rgba(144,175,189,.35); }
+.film-c.tr { top:24px; right:24px; border-top:1px solid rgba(144,175,189,.35); border-right:1px solid rgba(144,175,189,.35); }
+.film-c.bl { bottom:24px; left:24px; border-bottom:1px solid rgba(144,175,189,.35); border-left:1px solid rgba(144,175,189,.35); }
+.film-c.br { bottom:24px; right:24px; border-bottom:1px solid rgba(144,175,189,.35); border-right:1px solid rgba(144,175,189,.35); }
+
+/* ════════════════════════════════════════
+   BUTTONS
+════════════════════════════════════════ */
+.btn {
+  font-family:'Barlow Condensed',sans-serif; font-size:12px;
+  letter-spacing:.22em; text-transform:uppercase; padding:13px 32px;
+  cursor:none; transition:all .22s; text-decoration:none;
+  display:inline-block; border:none; font-weight:600;
+}
+.btn-red   { background:var(--red); color:var(--white); }
+.btn-red:hover { background:var(--bc); }
+.btn-out   { background:transparent; color:var(--bc); border:1.5px solid rgba(56,45,69,.25); padding:12px 32px; }
+.btn-out:hover { border-color:var(--red); color:var(--red); }
+
+/* Game page buttons */
+.btn-crimson { background:var(--g-crimson); color:#fff; }
+.btn-crimson:hover { background:#ff2a2d; transform:translateY(-2px); }
+.btn-game-out { background:transparent; color:var(--g-nepal); border:1.5px solid rgba(144,175,189,.3); padding:12px 32px; }
+.btn-game-out:hover { border-color:var(--g-nepal); color:#fff; }
+
+/* Steam button */
+.btn-steam {
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:'Barlow Condensed',sans-serif; font-size:13px;
+  font-weight:700; letter-spacing:.15em; text-transform:uppercase;
+  padding:16px 36px; background:var(--g-crimson); color:#fff;
+  border:none; cursor:none; transition:all .25s; text-decoration:none;
+}
+.btn-steam:hover { background:#ff2a2d; transform:translateY(-2px); box-shadow:0 12px 40px rgba(235,16,19,.3); }
+.btn-steam svg { width:20px; height:20px; fill:currentColor; }
+.btn-steam-pending {
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:'Barlow Condensed',sans-serif; font-size:13px;
+  font-weight:700; letter-spacing:.15em; text-transform:uppercase;
+  padding:16px 36px; background:transparent; color:rgba(144,175,189,.4);
+  border:1.5px solid rgba(144,175,189,.15);
+}
+
+/* ════════════════════════════════════════
+   WORK PAGE — MASONRY
+════════════════════════════════════════ */
+#work { background:var(--nebula); }
+.work-header { padding:60px 48px 48px; display:flex; align-items:flex-end; justify-content:space-between; border-bottom:1px solid var(--bc-faint); }
+.sec-eyebrow {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.3em;
+  color:var(--red); text-transform:uppercase; margin-bottom:14px;
+  display:flex; align-items:center; gap:12px;
+}
+.sec-eyebrow::before { content:''; width:20px; height:1px; background:var(--red); display:block; }
+.sec-title { font-family:'Bebas Neue',sans-serif; font-size:64px; line-height:.9; letter-spacing:.02em; }
+
+.work-count {
+  font-family:'Space Mono',monospace; font-size:10px;
+  letter-spacing:.15em; color:var(--bc-dim);
+}
+
+.masonry {
+  padding: 3px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 3px;
+  align-items: start;
+}
+.masonry-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.masonry-item {
+  margin-bottom: 0;
+  position:relative; overflow:hidden; cursor:none;
+  background: var(--nebula-dark);
+  display: block;
+}
+.masonry-item { aspect-ratio: 16/9; contain: layout; }
+
+.m-thumb {
+  width:100%; height:100%; object-fit:cover;
+  transition: transform .7s cubic-bezier(.25,.46,.45,.94), filter .5s ease;
+  display:block;
+}
+.m-placeholder {
+  width:100%; height:100%; display:flex;
+  align-items:center; justify-content:center;
+  font-family:'Space Mono',monospace; font-size:9px;
+  letter-spacing:.15em; color:var(--bc-faint);
+  text-align:center; text-transform:uppercase; line-height:2;
+  transition: transform .7s cubic-bezier(.25,.46,.45,.94);
+}
+/* unique bg per item via nth-child */
+.masonry-item:nth-child(6n+1) .m-placeholder { background:linear-gradient(135deg,#c8d0d4,#b8c4c0); }
+.masonry-item:nth-child(6n+2) .m-placeholder { background:linear-gradient(135deg,#d0c8d4,#c0b8c8); }
+.masonry-item:nth-child(6n+3) .m-placeholder { background:linear-gradient(135deg,#d4cec8,#c8c0b8); }
+.masonry-item:nth-child(6n+4) .m-placeholder { background:linear-gradient(135deg,#c8d4ce,#b8c8c4); }
+.masonry-item:nth-child(6n+5) .m-placeholder { background:linear-gradient(135deg,#d4c8ce,#c8b8c0); }
+.masonry-item:nth-child(6n+6) .m-placeholder { background:linear-gradient(135deg,#ced4c8,#c4c8b8); }
+
+/* Hover — image zoom + desaturate slightly */
+.masonry-item:hover .m-thumb { transform:scale(1.06); filter:brightness(.88) saturate(.9); }
+.masonry-item:hover .m-placeholder { transform:scale(1.06); }
+
+/* Overlay — gradient from bottom + subtle vignette */
+.m-overlay {
+  position:absolute; inset:0;
+  background:
+    linear-gradient(to top, rgba(24,18,34,.92) 0%, rgba(24,18,34,.45) 38%, transparent 65%),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.25) 100%);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:22px 20px 20px;
+  opacity:0;
+  transition: opacity .4s cubic-bezier(.25,.46,.45,.94);
+}
+.masonry-item:hover .m-overlay { opacity:1; }
+
+/* Top-right category tag — slides in from right */
+.m-cat-tag {
+  position:absolute; top:16px; right:0;
+  font-family:'Space Mono',monospace; font-size:8px;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--white); background:var(--red);
+  padding:4px 12px 4px 10px;
+  transform:translateX(110%);
+  transition: transform .4s cubic-bezier(.34,1.36,.64,1) .05s;
+}
+.masonry-item:hover .m-cat-tag { transform:translateX(0); }
+
+/* Bottom text — slides up */
+.m-info {
+  transform: translateY(10px);
+  transition: transform .4s cubic-bezier(.25,.46,.45,.94) .05s;
+}
+.masonry-item:hover .m-info { transform: translateY(0); }
+
+.m-cat  { font-family:'Space Mono',monospace; font-size:7px; letter-spacing:.28em; color:var(--red); text-transform:uppercase; margin-bottom:5px; }
+.m-name { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; color:var(--white); letter-spacing:.04em; line-height:1.1; margin-bottom:6px; }
+.m-meta { font-family:'Space Mono',monospace; font-size:8px; color:rgba(220,228,224,.45); letter-spacing:.08em; }
+
+/* Red line accent — expands from left */
+.m-line {
+  position:absolute; bottom:0; left:0;
+  height:2px; width:0; background:var(--red);
+  transition: width .5s cubic-bezier(.25,.46,.45,.94);
+}
+.masonry-item:hover .m-line { width:100%; }
+
+/* Play button — scales up with bounce */
+.m-play {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(.6);
+  width:56px; height:56px;
+  border:1.5px solid rgba(255,255,255,.3);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0;
+  transition: transform .4s cubic-bezier(.34,1.36,.64,1), opacity .3s ease,
+              border-color .3s ease, background .3s ease;
+  backdrop-filter: blur(4px);
+  background: rgba(208,60,55,.15);
+}
+.m-play::after {
+  content:''; border-style:solid;
+  border-width:9px 0 9px 17px;
+  border-color:transparent transparent transparent #fff;
+  margin-left:4px;
+}
+.masonry-item:hover .m-play {
+  opacity:1; transform:translate(-50%,-50%) scale(1);
+  border-color:rgba(208,60,55,.8);
+  background:rgba(208,60,55,.25);
+}
+
+/* ════════════════════════════════════════
+   ABOUT PAGE
+════════════════════════════════════════ */
+#about { background:var(--nebula); }
+.about-wrap { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--bc-faint); }
+.about-l { padding:60px 56px 80px 48px; border-right:1px solid var(--bc-faint); }
+.about-r { padding:60px 48px 80px 56px; }
+
+.about-name { font-family:'Bebas Neue',sans-serif; font-size:80px; line-height:.85; margin:20px 0 44px; }
+.about-name span { color:var(--red); display:block; }
+.about-bio { font-size:15px; line-height:1.85; color:var(--bc-dim); margin-bottom:24px; max-width:420px; }
+.about-bio strong { color:var(--bc); font-weight:400; }
+
+.stats-row { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--bc-faint); margin-top:48px; }
+.stat-cell { padding:28px 0; border-right:1px solid var(--bc-faint); padding-right:24px; margin-right:24px; }
+.stat-cell:nth-child(2n) { border-right:none; }
+.stat-cell .big { font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--red); line-height:1; }
+.stat-cell .desc { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:var(--bc-dim); text-transform:uppercase; margin-top:6px; line-height:1.5; }
+
+.about-photo { position:relative; height:400px; overflow:hidden; margin-bottom:40px; background:var(--nebula-dark); }
+.about-photo img { width:100%; height:100%; object-fit:cover; }
+.about-photo-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.3em; color:var(--bc-dim); background: linear-gradient(135deg, var(--nebula-dark), var(--nebula)); }
+.founder-card { position:absolute; bottom:24px; left:24px; background:var(--white); padding:16px 20px; border-left:2px solid var(--red); }
+.fc-name { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:600; color:var(--bc); margin-bottom:4px; }
+.fc-role { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:var(--red); text-transform:uppercase; }
+
+.cap-section { border-top:1px solid var(--bc-faint); padding-top:36px; }
+.cap-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:.28em; color:var(--bc-dim); text-transform:uppercase; margin-bottom:20px; }
+.cap-list { list-style:none; }
+.cap-list li {
+  display:flex; align-items:center; gap:14px; font-size:14px; color:var(--bc-dim);
+  padding:12px 0; border-bottom:1px solid var(--bc-faint);
+  transition:color .2s; cursor:none;
+}
+.cap-list li:hover { color:var(--bc); }
+.cap-list li::before { content:'→'; color:var(--red); font-size:11px; flex-shrink:0; }
+.cap-tag { margin-left:auto; font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.12em; color:var(--bc-faint); }
+
+/* ════════════════════════════════════════
+   CONTACT PAGE
+════════════════════════════════════════ */
+#contact { background:var(--nebula); }
+.contact-wrap { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--bc-faint); }
+.contact-l { padding:60px 56px 80px 48px; border-right:1px solid var(--bc-faint); display:flex; flex-direction:column; }
+.contact-r { padding:60px 48px 80px 56px; }
+
+.contact-title { font-family:'Bebas Neue',sans-serif; font-size:76px; line-height:.88; margin:20px 0 44px; }
+.contact-title span { color:var(--red); }
+
+.contact-info { display:flex; flex-direction:column; gap:28px; }
+.ci-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.28em; color:var(--bc-dim); text-transform:uppercase; margin-bottom:8px; }
+.ci-val { font-size:15px; color:var(--bc); }
+.ci-val a { color:var(--bc); text-decoration:none; transition:color .2s; cursor:none; }
+.ci-val a:hover { color:var(--red); }
+
+.process-section { margin-top:auto; padding-top:48px; border-top:1px solid var(--bc-faint); }
+.ps-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:.28em; color:var(--bc-dim); text-transform:uppercase; margin-bottom:20px; }
+.process-step { display:flex; gap:16px; padding:14px 0; border-bottom:1px solid var(--bc-faint); }
+.ps-num { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--red); line-height:1; width:24px; flex-shrink:0; }
+.ps-text strong { display:block; font-size:13px; font-weight:500; color:var(--bc); margin-bottom:2px; }
+.ps-text span { font-size:12px; color:var(--bc-dim); line-height:1.6; }
+
+.socials-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:32px; }
+.social-a { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--bc-dim); text-decoration:none; padding:8px 14px; border:1px solid var(--bc-faint); transition:all .2s; cursor:none; }
+.social-a:hover { border-color:var(--red); color:var(--red); }
+
+.form-wrap { display:flex; flex-direction:column; }
+.fg { position:relative; border-bottom:1px solid var(--bc-faint); }
+.fg:first-child { border-top:1px solid var(--bc-faint); }
+.fl { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.28em; color:var(--red); text-transform:uppercase; position:absolute; top:18px; left:0; }
+.fi, .fsel, .fta { width:100%; background:transparent; border:none; outline:none; font-family:'Barlow',sans-serif; font-size:14px; font-weight:300; color:var(--bc); padding:40px 0 14px; cursor:none; }
+.fta { resize:none; height:110px; }
+.fsel { appearance:none; }
+.fsel option { background:var(--white); }
+.f-submit { margin-top:24px; align-self:flex-start; }
+
+/* ════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════ */
+footer { border-top:1px solid var(--bc-faint); padding:28px 48px; display:flex; align-items:center; justify-content:space-between; }
+.ft-l, .ft-r { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:var(--bc-dim); text-transform:uppercase; }
+body.on-game footer { background:var(--g-bg); border-color:rgba(144,175,189,.1); }
+body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
+
+/* ════════════════════════════════════════
+   GAME LANDING PAGE
+════════════════════════════════════════ */
+#game { background:var(--g-bg); color:var(--g-text); padding-top:0; }
+
+/* Game Hero */
+.game-hero {
+  height: 100vh; position:relative; overflow:hidden;
+  display:flex; align-items:flex-end;
+}
+.game-hero-bg {
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, #0c0c18 0%, #12182e 40%, #1a0e2a 70%, #0c0c18 100%);
+}
+.game-hero-img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:center top;
+  opacity:.65; mix-blend-mode:luminosity;
+}
+.game-hero-concept {
+  position:absolute; right:0; top:0; bottom:0; width:55%;
+  display:flex; align-items:center; justify-content:center;
+}
+.game-hero-concept img { height:100%; width:100%; object-fit:cover; object-position:center top; }
+.game-hero-grad {
+  position:absolute; inset:0;
+  background:
+    linear-gradient(to right, var(--g-bg) 0%, rgba(12,12,24,.6) 45%, transparent 75%),
+    linear-gradient(to top, var(--g-bg) 0%, transparent 35%);
+}
+
+/* Scanlines on game page */
+.scanlines {
+  position:absolute; inset:0; pointer-events:none; z-index:2;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);
+}
+
+.game-hero-content {
+  position:relative; z-index:5; padding:0 48px 80px; max-width:600px;
+}
+.game-eyebrow {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.35em;
+  color:var(--g-nepal); text-transform:uppercase; margin-bottom:24px;
+  display:flex; align-items:center; gap:12px;
+}
+.game-eyebrow::before { content:''; width:24px; height:1px; background:var(--g-nepal); display:block; }
+
+.game-title-en {
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(56px,8vw,100px);
+  line-height:.88; letter-spacing:.03em; color:var(--g-text);
+  white-space:pre-line; margin-bottom:4px;
+}
+.game-title-zh {
+  font-family:'Barlow Condensed',sans-serif; font-size:24px;
+  font-weight:600; letter-spacing:.2em; color:var(--g-nepal); margin-bottom:32px;
+}
+.game-tagline {
+  font-family:'Barlow Condensed',sans-serif; font-size:22px;
+  font-weight:600; letter-spacing:.04em; color:var(--g-crimson); margin-bottom:20px;
+}
+.game-desc { font-size:15px; line-height:1.8; color:rgba(221,232,238,.65); max-width:480px; margin-bottom:40px; }
+.game-actions { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+
+.game-scroll-hint {
+  position:absolute; bottom:48px; right:48px; z-index:5;
+  writing-mode:vertical-rl; font-family:'Space Mono',monospace; font-size:8px;
+  letter-spacing:.3em; color:rgba(144,175,189,.4); text-transform:uppercase;
+  display:flex; align-items:center; gap:12px;
+}
+.game-scroll-hint::after { content:''; width:1px; height:40px; background:linear-gradient(to bottom,rgba(144,175,189,.4),transparent); animation:sh 2s ease-in-out infinite; }
+@keyframes sh { 0%,100%{opacity:.3}50%{opacity:1} }
+
+/* Game features section */
+.game-features { padding:80px 48px; border-top:1px solid rgba(144,175,189,.1); }
+.game-features-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(144,175,189,.08); margin-top:48px; border:1px solid rgba(144,175,189,.08); }
+.gf-item { background:var(--g-bg); padding:32px 24px; }
+.gf-num { font-family:'Bebas Neue',sans-serif; font-size:32px; color:rgba(144,175,189,.2); line-height:1; margin-bottom:12px; }
+.gf-name { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--g-text); margin-bottom:8px; }
+.gf-desc { font-size:12px; color:rgba(144,175,189,.6); line-height:1.6; }
+
+/* Game art showcase */
+.game-art { padding:0 48px 80px; }
+.game-art-grid { display:grid; grid-template-columns:2fr 1fr; gap:3px; }
+.ga-main { aspect-ratio:16/9; overflow:hidden; position:relative; background:rgba(144,175,189,.05); }
+.ga-side { display:grid; grid-template-rows:1fr 1fr; gap:3px; }
+.ga-thumb { aspect-ratio:4/3; overflow:hidden; position:relative; background:rgba(144,175,189,.05); }
+.ga-img { width:100%; height:100%; object-fit:cover; transition:transform .6s cubic-bezier(.25,.46,.45,.94); }
+.ga-main:hover .ga-img, .ga-thumb:hover .ga-img { transform:scale(1.04); }
+.ga-ph {
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em;
+  color:rgba(144,175,189,.2); text-transform:uppercase;
+}
+
+/* Game CTA section */
+.game-cta {
+  padding:80px 48px; border-top:1px solid rgba(144,175,189,.1);
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(to right, rgba(235,16,19,.04), transparent);
+}
+.game-cta-text .big { font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--g-text); line-height:1; margin-bottom:8px; }
+.game-cta-text .small { font-size:14px; color:rgba(144,175,189,.6); }
+.game-cta-btns { display:flex; gap:16px; }
+
+/* ════════════════════════════════════════
+   TRAILER MODAL
+════════════════════════════════════════ */
+#trailerModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.96); z-index: 20001;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+#trailerModal.open { display: flex; animation: fadeIn .3s ease; }
+.trailer-close {
+  position: absolute; top: 32px; right: 40px;
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  letter-spacing: .2em; color: rgba(144,175,189,.5);
+  background: none; border: none; cursor: none;
+  transition: color .2s; text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+}
+.trailer-close:hover { color: var(--g-crimson); }
+.trailer-wrap {
+  width: 90vw; max-width: 1280px; aspect-ratio: 16/9; position: relative;
+}
+.trailer-wrap iframe { width: 100%; height: 100%; border: none; }
+.trailer-label {
+  margin-top: 20px; font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: .3em; color: rgba(144,175,189,.25); text-transform: uppercase;
+}
+
+/* Trailer play button */
+.btn-trailer {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  padding: 15px 32px; background: transparent; color: var(--g-text);
+  border: 1.5px solid rgba(221,232,238,.25); cursor: none;
+  transition: all .25s; text-decoration: none;
+}
+.btn-trailer:hover { border-color: var(--g-text); background: rgba(221,232,238,.06); }
+.btn-trailer .play-tri {
+  width: 0; height: 0; border-style: solid;
+  border-width: 6px 0 6px 11px;
+  border-color: transparent transparent transparent var(--g-crimson);
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════
+   SCROLLBAR
+════════════════════════════════════════ */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--bc-faint); }
+::-webkit-scrollbar-thumb:hover { background:var(--red); }
+body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
+</style>
+</head>
+<body>
+
+<div class="cur-dot" id="curDot"></div>
+<div class="cur-ring" id="curRing"></div>
+<div class="cur-trail" id="curTrail"></div>
+<div id="curtain"></div>
+
+<div id="loader">
+  <div class="ld-logo">SHOCKUNIT</div>
+  <div class="ld-track"><div class="ld-bar"></div></div>
+</div>
+
+<nav id="mainNav"></nav>
+
+<div class="page active" id="home"></div>
+<div class="page" id="work"></div>
+<div class="page" id="about"></div>
+<div class="page" id="contact"></div>
+<div class="page" id="game"></div>
+
+<!-- TRAILER MODAL -->
+<div id="trailerModal">
+  <button class="trailer-close" onclick="closeTrailer()">✕ &nbsp;Close</button>
+  <div class="trailer-wrap">
+    <iframe id="trailerFrame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+  </div>
+  <div class="trailer-label">STREAM ALLIANCE — Official Trailer</div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:20000;align-items:center;justify-content:center;">
+  <div style="position:relative;width:85vw;max-width:1080px;aspect-ratio:16/9;">
+    <button onclick="closeModal()" style="position:absolute;top:-44px;right:0;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--nebula);background:none;border:none;cursor:none;">✕ CLOSE</button>
+    <iframe id="mFrame" src="" style="width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let LANG = 'en';
+let CURRENT = 'home';
+
+const D = SITE_DATA;
+function t(obj) { return (obj && obj[LANG]) ? obj[LANG] : (obj && obj.en ? obj.en : obj); }
+
+// ════════════════════════════════════════
+//  RENDER: NAV
+// ════════════════════════════════════════
+function renderNav() {
+  const pages = [
+    {id:'home',  en:'Home',    zh:'首页'},
+    {id:'work',  en:'Work',    zh:'作品'},
+    {id:'about', en:'About',   zh:'关于'},
+    {id:'contact',en:'Contact',zh:'联系'}
+  ];
+  const links = pages.map(p =>
+    `<li><a href="#" onclick="navigate('${p.id}');return false;" id="nl-${p.id}" ${CURRENT===p.id?'class="active"':''}>${LANG==='en'?p.en:p.zh}</a></li>`
+  ).join('');
+  document.getElementById('mainNav').innerHTML = `
+    <a class="nav-logo" href="#" onclick="navigate('home');return false;">
+      <img class="nav-mark" src="images/shockunit_logo.png" alt="Shockunit"
+        onload="this.style.opacity='1';document.getElementById('nav-su-fallback').style.display='none';"
+        onerror="this.style.display='none';document.getElementById('nav-su-fallback').style.display='grid';">
+      <span id="nav-su-fallback" style="display:none;width:26px;height:26px;border:1.5px solid var(--red);place-items:center;font-size:9px;font-family:'Space Mono',monospace;color:var(--red);">SU</span>
+      ${D.studio.name}
+    </a>
+    <ul class="nav-links">${links}</ul>
+    <div class="lang-toggle">
+      <button class="lang-btn ${LANG==='en'?'active':''}" onclick="setLang('en')">EN</button>
+      <span class="lang-sep">/</span>
+      <button class="lang-btn ${LANG==='zh'?'active':''}" onclick="setLang('zh')">中</button>
+    </div>`;
+  bindHover();
+}
+
+// ════════════════════════════════════════
+//  RENDER: HOME
+// ════════════════════════════════════════
+function renderHome() {
+  const h = D.hero; const s = D.studio;
+  const hasPoster = h.posterImage;
+  const posterContent = hasPoster
+    ? `<img class="poster-img" src="${h.posterImage}" alt="${t(h.posterTitle)}">`
+    : `<div class="poster-placeholder"></div>`;
+
+  document.getElementById('home').innerHTML = `
+    <div class="home-wrap">
+      <div class="home-left">
+        <div class="home-eyebrow">${t(h.eyebrow)}</div>
+        <div class="home-title">${LANG==='en'?'SHOCK<em>UNIT</em>':'震荡<em>单元</em>'}</div>
+        <div class="home-tagline">${t(s.tagline)}</div>
+        <div class="home-actions">
+          <a class="btn btn-red" href="#" onclick="navigate('work');return false;">${LANG==='en'?'Our Work':'查看作品'}</a>
+          <a class="btn btn-out" href="#" onclick="navigate('contact');return false;">${LANG==='en'?'Get in Touch':'联系我们'}</a>
+        </div>
+        <div class="home-meta">
+          <div class="hm-stat"><div class="n" style="font-size:14px;letter-spacing:.05em;">${LANG==='en'?'Beijing / Hong Kong':'中国北京 / 香港'}</div></div>
+        </div>
+      </div>
+      <div class="home-right" onclick="navigate('game')" style="cursor:none;">
+        ${posterContent}
+        <div class="poster-overlay"></div>
+        <div class="film-c tl"></div><div class="film-c tr"></div>
+        <div class="film-c bl"></div><div class="film-c br"></div>
+        <div class="poster-info">
+          <div class="poster-label-tag">${t(h.posterLabel)}</div>
+          <div class="poster-game-title">${t(h.posterTitle)}</div>
+          <div class="poster-game-sub">${t(h.posterSubtitle)}</div>
+        </div>
+        <div class="poster-click-hint">${LANG==='en'?'View\nGame':'查看\n游戏'}</div>
+      </div>
+    </div>
+    ${renderFooter()}`;
+  bindHover();
+}
+
+// ════════════════════════════════════════
+//  RENDER: WORK (MASONRY)
+// ════════════════════════════════════════
+function renderWork() {
+  const makeItem = w => {
+    const thumb = w.thumb
+      ? `<img class="m-thumb" src="${w.thumb}" alt="${w.title}" loading="lazy">`
+      : `<div class="m-placeholder">${w.title}</div>`;
+    const meta = [w.duration, w.client, w.year].filter(Boolean).join(' · ');
+    return `
+      <div class="masonry-item asp-${w.aspect}" onclick="openModal('${w.vimeo}')">
+        ${thumb}
+        <div class="m-cat-tag">${t(w.catLabel)}</div>
+        <div class="m-overlay">
+          <div class="m-info">
+            <div class="m-cat">${t(w.catLabel)}</div>
+            <div class="m-name">${w.title}</div>
+            <div class="m-meta">${meta}</div>
+          </div>
+        </div>
+        <div class="m-play"></div>
+        <div class="m-line"></div>
+      </div>`;
+  };
+
+  // Distribute items round-robin across 3 columns so visual order is top-to-bottom
+  // item 1→col0, item 2→col1, item 3→col2, item 4→col0, ...
+  const cols = [[], [], []];
+  D.works.forEach((w, i) => cols[i % 3].push(makeItem(w)));
+  const masonry = cols.map(c => `<div class="masonry-col">${c.join('')}</div>`).join('');
+
+  document.getElementById('work').innerHTML = `
+    <div class="work-header">
+      <div>
+        <div class="sec-eyebrow">${LANG==='en'?'Portfolio':'作品集'}</div>
+        <div class="sec-title">${LANG==='en'?'WORK':'作品'}</div>
+      </div>
+      <div class="work-count">${D.works.length} ${LANG==='en'?'Projects':'个作品'}</div>
+    </div>
+    <div class="masonry">${masonry}</div>
+    ${renderFooter()}`;
+  bindHover();
+}
+
+// ════════════════════════════════════════
+//  RENDER: ABOUT
+// ════════════════════════════════════════
+function renderAbout() {
+  const ab = D.about; const s = D.studio;
+  const bio = t(ab.bio).map(p => `<div class="about-bio">${p}</div>`).join('');
+  const caps = ab.capabilities.map(c =>
+    `<li>${t(c)}<span class="cap-tag">${c.type}</span></li>`).join('');
+  const photo = ab.studioPhoto
+    ? `<img src="${ab.studioPhoto}" alt="Shockunit Studio">`
+    : `<div class="about-photo-ph">${LANG==='en'?'Studio Photo':'工作室照片'}</div>`;
+
+  document.getElementById('about').innerHTML = `
+    <div class="about-wrap">
+      <div class="about-l">
+        <div class="sec-eyebrow">${LANG==='en'?'About Us':'关于我们'}</div>
+        <div class="about-name">SHOCK<span>UNIT</span></div>
+        ${bio}
+        <div class="stats-row">
+          <div class="stat-cell"><div class="big">2008</div><div class="desc">${LANG==='en'?'Established\nin Beijing':'成立于\n北京'}</div></div>
+          <div class="stat-cell"><div class="big">17+</div><div class="desc">${LANG==='en'?'Years of\nproduction':'年制作\n经验'}</div></div>
+          <div class="stat-cell"><div class="big">2D</div><div class="desc">${LANG==='en'?'Animation &\nGame Dev':'动画制作\n游戏开发'}</div></div>
+          <div class="stat-cell"><div class="big" style="font-size:22px;line-height:1.2;">BJ/HK</div><div class="desc">${LANG==='en'?'Beijing &\nHong Kong':'北京 &\n香港'}</div></div>
+        </div>
+      </div>
+      <div class="about-r">
+        <div class="about-photo">
+          ${photo}
+          <div class="founder-card">
+            <div class="fc-name">${ab.founder}</div>
+            <div class="fc-role">${t(ab.founderTitle)}</div>
+          </div>
+        </div>
+        <div class="cap-section">
+          <div class="cap-label">${LANG==='en'?'Capabilities':'服务能力'}</div>
+          <ul class="cap-list">${caps}</ul>
+        </div>
+      </div>
+    </div>
+    ${renderFooter()}`;
+  bindHover();
+}
+
+// ════════════════════════════════════════
+//  RENDER: CONTACT
+// ════════════════════════════════════════
+function renderContact() {
+  const ct = D.contact; const s = D.studio;
+  const steps = ct.process.map(step => {
+    const sd = t(step); const num = ct.process.indexOf(step) + 1;
+    return `<div class="process-step"><div class="ps-num">0${num}</div><div class="ps-text"><strong>${sd.title}</strong><span>${sd.desc}</span></div></div>`;
+  }).join('');
+  const ptypes = t(ct.projectTypes).map(p => `<option>${p}</option>`).join('');
+  const social = s.socials;
+
+  document.getElementById('contact').innerHTML = `
+    <div class="contact-wrap">
+      <div class="contact-l">
+        <div>
+          <div class="sec-eyebrow">${LANG==='en'?'Let\'s Talk':'开始合作'}</div>
+          <div class="contact-title">${LANG==='en'?'START A<br><span>PROJECT</span>':'开始一个<br><span>项目</span>'}</div>
+          <div class="contact-info">
+            <div><div class="ci-label">${LANG==='en'?'Email':'邮箱'}</div><div class="ci-val"><a href="mailto:${s.email}">${s.email}</a></div></div>
+            <div><div class="ci-label">${LANG==='en'?'Location':'位置'}</div><div class="ci-val">${t(s.location)}</div></div>
+            <div><div class="ci-label">${LANG==='en'?'Response Time':'回复时间'}</div><div class="ci-val">${LANG==='en'?'Within 48 hours':'48小时内'}</div></div>
+          </div>
+        </div>
+        <div class="process-section">
+          <div class="ps-label">${LANG==='en'?'How We Work':'合作流程'}</div>
+          ${steps}
+        </div>
+        <div class="socials-row">
+          <a class="social-a" href="${social.twitter}" target="_blank">X / Twitter</a>
+          <a class="social-a" href="${social.youtube}" target="_blank">YouTube</a>
+          <a class="social-a" href="${social.instagram}" target="_blank">Instagram</a>
+        </div>
+      </div>
+      <div class="contact-r">
+        <div class="sec-eyebrow" style="margin-bottom:32px;">${LANG==='en'?'Send a Brief':'发送简报'}</div>
+        <form class="form-wrap" action="${ct.formspreeUrl}" method="POST">
+          <div class="fg"><div class="fl">${LANG==='en'?'Name':'姓名'}</div><input class="fi" type="text" name="name" placeholder="${LANG==='en'?'Your full name':'你的姓名'}" required></div>
+          <div class="fg"><div class="fl">${LANG==='en'?'Email':'邮箱'}</div><input class="fi" type="email" name="email" placeholder="${LANG==='en'?'your@email.com':'邮箱地址'}" required></div>
+          <div class="fg">
+            <div class="fl">${LANG==='en'?'Project Type':'项目类型'}</div>
+            <select class="fsel fi" name="type"><option value="" disabled selected>${LANG==='en'?'Select type':'选择类型'}</option>${ptypes}</select>
+          </div>
+          <div class="fg"><div class="fl">${LANG==='en'?'Message':'留言'}</div><textarea class="fta" name="message" placeholder="${LANG==='en'?'Describe your project, timeline, and references...':'描述你的项目、时间线和参考资料...'}" required></textarea></div>
+          <button class="btn btn-red f-submit" type="submit">${LANG==='en'?'Send Brief →':'发送简报 →'}</button>
+        </form>
+      </div>
+    </div>
+    ${renderFooter()}`;
+  bindHover();
+}
+
+// ════════════════════════════════════════
+//  RENDER: GAME LANDING PAGE
+// ════════════════════════════════════════
+function renderGame() {
+  const g = D.game; const s = D.studio;
+  const heroImg = g.heroImage
+    ? `<div class="game-hero-concept"><img src="${g.heroImage}" alt="${g.titleEn}"></div>`
+    : `<div class="game-hero-concept" style="background:linear-gradient(160deg,#1a0e2a,#0c0c18);"></div>`;
+
+  const steamUrl = g.steamUrl;
+
+  // 主入口按钮：加入愿望单（最重要的 CTA）
+  const wishlistBtn = steamUrl
+    ? `<a class="btn-steam" href="${steamUrl}" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0z"/></svg>
+        ${LANG==='en'?'Add to Wishlist on Steam':'在 Steam 加入愿望单'}
+      </a>`
+    : `<span class="btn-steam-pending">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;opacity:.5;"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0z"/></svg>
+        ${LANG==='en'?'Steam Page Coming Soon':'Steam 页面即将公布'}
+      </span>`;
+
+  // 次要按钮：直达 Steam 商店页
+  const viewOnSteamBtn = steamUrl
+    ? `<a class="btn btn-game-out" href="${steamUrl}" target="_blank">
+        ${LANG==='en'?'View on Steam →':'查看 Steam 页面 →'}
+      </a>`
+    : '';
+
+  // 预告片按钮
+  const trailerBtn = g.trailerUrl
+    ? `<button class="btn-trailer" onclick="openTrailer('${g.trailerUrl}')">
+        <span class="play-tri"></span>
+        ${LANG==='en'?'Watch Trailer':'观看预告片'}
+      </button>`
+    : '';
+
+  const features = g.features.map((f, i) => `
+    <div class="gf-item">
+      <div class="gf-num">0${i+1}</div>
+      <div class="gf-name">${t(f)}</div>
+      <div class="gf-desc">${t(f.desc)}</div>
+    </div>`).join('');
+
+  const artImages = g.artImages.map((img, i) => {
+    const phClass = i === 0 ? 'ga-main' : 'ga-thumb';
+    return `<div class="${phClass}"><img class="ga-img" src="${img}" alt="Art ${i+1}" onerror="this.style.display='none'"></div>`;
+  });
+
+  const artGrid = g.artImages.length
+    ? `<div class="game-art-grid">${artImages[0]}<div class="ga-side">${artImages.slice(1).join('')}</div></div>`
+    : `<div style="height:300px;background:rgba(144,175,189,.04);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.3em;color:rgba(144,175,189,.2);">ADD CONCEPT ART → images/game/</div>`;
+
+  document.getElementById('game').innerHTML = `
+    <div class="game-hero">
+      <div class="game-hero-bg"></div>
+      ${heroImg}
+      <div class="game-hero-grad"></div>
+      <div class="scanlines"></div>
+      <div class="game-hero-content">
+        <div class="game-eyebrow">${t(g.genre)}</div>
+        <div class="game-title-en">${t({en:g.titleEn,zh:g.titleZh})}</div>
+        <div class="game-title-zh">${LANG==='en'?g.titleZh:g.titleEn}</div>
+        <div class="game-tagline">${t(g.tagline)}</div>
+        <div class="game-desc">${t(g.description)}</div>
+        <div class="game-actions">
+          ${wishlistBtn}
+          ${trailerBtn}
+          <a class="btn btn-game-out" href="#" onclick="navigate('about');return false;">${LANG==='en'?'About the Studio':'关于工作室'}</a>
+        </div>
+      </div>
+      <div class="game-scroll-hint">${LANG==='en'?'Explore':'了解更多'}</div>
+    </div>
+
+    <div class="game-features">
+      <div class="sec-eyebrow" style="color:var(--g-nepal);">${LANG==='en'?'Game Features':'游戏特色'}</div>
+      <div class="game-features-grid">${features}</div>
+    </div>
+
+    <div class="game-art">
+      <div class="sec-eyebrow" style="color:var(--g-nepal);margin-bottom:24px;">${LANG==='en'?'Concept Art':'概念美术'}</div>
+      ${artGrid}
+    </div>
+
+    <div class="game-cta">
+      <div class="game-cta-text">
+        <div class="big">${LANG==='en'?'Wishlist now.':'现在加入愿望单。'}</div>
+        <div class="small">${steamUrl ? (LANG==='en'?'On Steam — free to wishlist, be first to know on launch day.':'在 Steam 免费加入愿望单，发售第一时间收到通知。') : (LANG==='en'?'Steam page coming soon. Follow us for updates.':'Steam 页面即将公布，关注我们获取最新动态。')}</div>
+      </div>
+      <div class="game-cta-btns">
+        ${wishlistBtn}
+        ${viewOnSteamBtn}
+        <a class="btn btn-game-out" href="#" onclick="navigate('home');return false;">${LANG==='en'?'← Back to Site':'← 返回主站'}</a>
+      </div>
+    </div>
+    ${renderFooter()}`;
+  bindHover();
+}
+
+// ════════════════════════════════════════
+//  RENDER: FOOTER
+// ════════════════════════════════════════
+function renderFooter() {
+  const s = D.studio;
+  return `<footer>
+    <div class="ft-l">©${new Date().getFullYear()} ${s.name} — ${t(s.location)}</div>
+    <div class="ft-r">${s.email}</div>
+  </footer>`;
+}
+
+// ════════════════════════════════════════
+//  NAVIGATION WITH CURTAIN TRANSITION
+// ════════════════════════════════════════
+function updateOG(id) {
+  const g = D.game; const s = D.studio;
+  const base = 'https://shockunit.xyz/';
+  let title, desc, image, url;
+  if (id === 'game') {
+    title = `STREAM ALLIANCE / 直播联盟 — ${t(g.genre)}`;
+    desc  = t(g.tagline);
+    image = base + g.heroImage;
+    url   = base + '#game';
+  } else {
+    title = `SHOCKUNIT — ${t(s.tagline)}`;
+    desc  = t(s.description);
+    image = base + D.hero.posterImage;
+    url   = base;
+  }
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.setAttribute('content', val); };
+  set('og-title', title); set('og-description', desc); set('og-image', image); set('og-url', url);
+  set('tw-title', title); set('tw-image', image);
+  document.title = title;
+}
+
+function navigate(id) {
+  if (id === CURRENT) return;
+  const curtain = document.getElementById('curtain');
+  curtain.className = 'in';
+  setTimeout(() => {
+    CURRENT = id;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    renderNav();
+    updateOG(id);
+    window.scrollTo(0,0);
+    if (id === 'game') {
+      document.body.classList.add('on-game');
+    } else {
+      document.body.classList.remove('on-game');
+    }
+    curtain.className = 'out';
+  }, 450);
+}
+
+function setLang(l) {
+  if (LANG === l) return;
+  LANG = l;
+  renderAll();
+}
+
+function renderAll() {
+  renderNav();
+  renderHome();
+  renderWork();
+  renderAbout();
+  renderContact();
+  renderGame();
+}
+
+// ════════════════════════════════════════
+//  VIDEO MODAL
+// ════════════════════════════════════════
+function openModal(url) {
+  if (!url || url.includes('XXXXXXX')) return;
+  document.getElementById('mFrame').src = url + '?autoplay=1';
+  const m = document.getElementById('modal');
+  m.style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.getElementById('mFrame').src = '';
+}
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+
+function openTrailer(url) {
+  if (!url) return;
+  // 自动处理 YouTube 和 Vimeo 链接转为嵌入格式
+  let embedUrl = url;
+  if (url.includes('youtube.com/watch')) {
+    const id = new URL(url).searchParams.get('v');
+    embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+  } else if (url.includes('youtu.be/')) {
+    const id = url.split('youtu.be/')[1].split('?')[0];
+    embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+  } else if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
+    const id = url.split('vimeo.com/')[1].split('?')[0];
+    embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1`;
+  }
+  document.getElementById('trailerFrame').src = embedUrl;
+  document.getElementById('trailerModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTrailer() {
+  document.getElementById('trailerModal').classList.remove('open');
+  document.getElementById('trailerFrame').src = '';
+  document.body.style.overflow = '';
+}
+document.getElementById('trailerModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('trailerModal')) closeTrailer();
+});
+
+// ════════════════════════════════════════
+//  CURSOR
+// ════════════════════════════════════════
+const dot  = document.getElementById('curDot');
+const ring = document.getElementById('curRing');
+let mx=0, my=0, rx=0, ry=0;
+const trail = [];
+const TRAIL_LEN = 8;
+
+for (let i=0; i<TRAIL_LEN; i++) {
+  const s = document.createElement('span');
+  document.getElementById('curTrail').appendChild(s);
+  trail.push({ el:s, x:0, y:0, op:0 });
+}
+
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+
+(function tick() {
+  rx += (mx-rx)*.12; ry += (my-ry)*.12;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  for (let i=TRAIL_LEN-1; i>0; i--) {
+    trail[i].x += (trail[i-1].x - trail[i].x) * .3;
+    trail[i].y += (trail[i-1].y - trail[i].y) * .3;
+  }
+  trail[0].x += (mx - trail[0].x) * .4;
+  trail[0].y += (my - trail[0].y) * .4;
+  trail.forEach((t,i) => {
+    t.el.style.left = t.x+'px'; t.el.style.top = t.y+'px';
+    t.el.style.opacity = (1 - i/TRAIL_LEN) * .25;
+    const s = (1-i/TRAIL_LEN)*3; t.el.style.width=s+'px'; t.el.style.height=s+'px';
+  });
+  requestAnimationFrame(tick);
+})();
+
+function bindHover() {
+  document.querySelectorAll('a,button,.masonry-item,.home-right,.gf-item,.cap-list li').forEach(el => {
+    el.removeEventListener('mouseenter', onEnter);
+    el.removeEventListener('mouseleave', onLeave);
+    el.addEventListener('mouseenter', onEnter);
+    el.addEventListener('mouseleave', onLeave);
+  });
+}
+function onEnter() {
+  dot.style.transform='translate(-50%,-50%) scale(2.5)'; dot.style.opacity='.5';
+  ring.style.width='56px'; ring.style.height='56px';
+  if (document.body.classList.contains('on-game')) {
+    ring.style.borderColor='rgba(235,16,19,.7)';
+  } else {
+    ring.style.borderColor='rgba(208,60,55,.6)';
+  }
+}
+function onLeave() {
+  dot.style.transform='translate(-50%,-50%) scale(1)'; dot.style.opacity='1';
+  ring.style.width='32px'; ring.style.height='32px';
+  ring.style.borderColor = document.body.classList.contains('on-game') ? 'var(--g-nepal)' : 'var(--bc)';
+}
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+window.addEventListener('load', () => {
+  renderAll();
+  setTimeout(() => document.getElementById('loader').classList.add('gone'), 1800);
+});
+</script>
+</body>
+</html>

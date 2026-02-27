@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shockunit — 作品管理表</title>
+<style>
+:root {
+  --nebula: #DCE4E0;
+  --bc: #382D45;
+  --bc-dim: rgba(56,45,69,0.5);
+  --bc-faint: rgba(56,45,69,0.08);
+  --red: #D03C37;
+  --red-dim: rgba(208,60,55,0.1);
+  --white: #F8F6F3;
+  --green: #2d7a4f;
+  --green-dim: rgba(45,122,79,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--nebula);
+  color: var(--bc);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: var(--bc);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-title {
+  display: flex; align-items: center; gap: 14px;
+}
+.header-logo {
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--nebula);
+  letter-spacing: .08em;
+}
+.header-sub {
+  font-size: 11px;
+  color: rgba(220,228,224,.4);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.header-actions { display: flex; gap: 10px; }
+
+/* BUTTONS */
+.btn {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 8px 18px; border: none; cursor: pointer;
+  transition: all .18s;
+}
+.btn-primary { background: var(--red); color: #fff; }
+.btn-primary:hover { background: #b83330; }
+.btn-secondary { background: rgba(220,228,224,.12); color: var(--nebula); border: 1px solid rgba(220,228,224,.2); }
+.btn-secondary:hover { background: rgba(220,228,224,.2); }
+.btn-sm {
+  font-size: 10px; padding: 5px 12px;
+  font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; border: none; cursor: pointer;
+}
+.btn-add { background: var(--red); color: #fff; }
+.btn-add:hover { background: #b83330; }
+.btn-del { background: rgba(208,60,55,.1); color: var(--red); border: 1px solid rgba(208,60,55,.2); }
+.btn-del:hover { background: rgba(208,60,55,.2); }
+.btn-up, .btn-dn { background: var(--bc-faint); color: var(--bc-dim); border: 1px solid var(--bc-faint); width: 24px; height: 24px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+.btn-up:hover, .btn-dn:hover { background: var(--bc); color: var(--white); }
+
+/* TOOLBAR */
+.toolbar {
+  padding: 14px 32px;
+  background: var(--white);
+  border-bottom: 1px solid var(--bc-faint);
+  display: flex; gap: 12px; align-items: center;
+  flex-wrap: wrap;
+}
+.toolbar-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--bc-dim); margin-right: 4px;
+}
+
+/* TABLE WRAPPER */
+.table-wrap {
+  padding: 24px 32px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border: 1px solid var(--bc-faint);
+}
+thead tr {
+  background: var(--bc);
+  color: var(--nebula);
+}
+thead th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(220,228,224,.7);
+}
+thead th:first-child { color: var(--red); width: 52px; text-align: center; }
+
+tbody tr {
+  border-bottom: 1px solid var(--bc-faint);
+  transition: background .15s;
+}
+tbody tr:hover { background: rgba(208,60,55,.03); }
+tbody tr.dragging { opacity: .4; background: var(--red-dim); }
+tbody tr.drag-over { border-top: 2px solid var(--red); }
+
+td {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+td:first-child {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--red);
+  user-select: none;
+}
+
+/* INPUTS inside table */
+td input, td select {
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 12px;
+  color: var(--bc);
+  font-family: inherit;
+  transition: border-color .15s, background .15s;
+  outline: none;
+}
+td input:hover, td select:hover {
+  border-color: var(--bc-faint);
+}
+td input:focus, td select:focus {
+  border-color: var(--red);
+  background: rgba(208,60,55,.04);
+}
+td select { cursor: pointer; }
+
+/* STATUS BADGE */
+.badge {
+  display: inline-block;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 2px 7px;
+}
+.badge-ready { background: var(--green-dim); color: var(--green); }
+.badge-pending { background: var(--red-dim); color: var(--red); }
+
+/* ACTIONS CELL */
+.row-actions { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+
+/* DRAG HANDLE */
+.drag-handle {
+  cursor: grab; color: var(--bc-faint);
+  font-size: 14px; user-select: none;
+  padding: 0 4px;
+  transition: color .15s;
+}
+tr:hover .drag-handle { color: var(--bc-dim); }
+
+/* OUTPUT SECTION */
+.output-section {
+  margin: 0 32px 32px;
+  background: var(--bc);
+  border: 1px solid rgba(220,228,224,.1);
+}
+.output-header {
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(220,228,224,.08);
+}
+.output-title {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(220,228,224,.5);
+}
+.output-body {
+  padding: 16px 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: rgba(220,228,224,.75);
+  line-height: 1.7;
+  max-height: 320px;
+  overflow-y: auto;
+  white-space: pre;
+  word-break: break-all;
+}
+.output-body .key   { color: #90AFBD; }
+.output-body .str   { color: #c8e6c9; }
+.output-body .num   { color: #ffcc80; }
+.output-body .punc  { color: rgba(220,228,224,.3); }
+
+/* STATS BAR */
+.stats-bar {
+  padding: 10px 32px;
+  display: flex; gap: 24px;
+  background: rgba(56,45,69,.06);
+  border-bottom: 1px solid var(--bc-faint);
+  font-size: 11px;
+}
+.stat-item { display: flex; gap: 6px; align-items: center; }
+.stat-val { font-weight: 700; color: var(--red); }
+.stat-lbl { color: var(--bc-dim); }
+
+.check-item {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  background: var(--bc-faint);
+  color: var(--bc);
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 32px; right: 32px;
+  background: var(--bc); color: var(--nebula);
+  padding: 12px 20px; font-size: 12px;
+  font-weight: 600; letter-spacing: .08em;
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999; pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* HELP */
+.help-bar {
+  padding: 8px 32px;
+  background: rgba(208,60,55,.06);
+  border-bottom: 1px solid rgba(208,60,55,.1);
+  font-size: 11px;
+  color: var(--bc-dim);
+}
+.help-bar strong { color: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <div>
+      <div class="header-logo">SHOCKUNIT</div>
+      <div class="header-sub">作品管理表 · Works Manager</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick="importFromDataJS()">📂 导入现有数据</button>
+    <button class="btn btn-primary" onclick="generateOutput()">⚡ 生成代码 → 复制给 Claude</button>
+  </div>
+</header>
+
+<div class="help-bar">
+  <strong>使用方法：</strong>
+  填写表格 → 点击「生成代码」→ 把生成的内容发给 Claude，Claude 会自动更新网站。
+  拖拽行可调整顺序，编号自动重排。
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><span class="stat-val" id="stat-total">0</span><span class="stat-lbl">个作品</span></div>
+  <div class="stat-item"><span class="stat-val" id="stat-ready">0</span><span class="stat-lbl">已填 Vimeo 链接</span></div>
+  <div class="stat-item"><span class="stat-val" id="stat-pending">0</span><span class="stat-lbl">待填</span></div>
+</div>
+
+<div class="toolbar">
+  <span class="toolbar-label">新增</span>
+  <button class="btn btn-sm btn-add" onclick="addRow()">+ 添加作品</button>
+  <span class="toolbar-label" style="margin-left:16px;">批量填入 Vimeo ID</span>
+  <input id="bulk-input" type="text" placeholder="编号:ID 编号:ID ... 例: 1:123456789 3:987654321"
+    style="width:340px;padding:6px 10px;border:1px solid var(--bc-faint);background:var(--white);font-size:12px;color:var(--bc);outline:none;"
+    onkeydown="if(event.key==='Enter')bulkFill()">
+  <button class="btn btn-sm btn-add" onclick="bulkFill()">填入</button>
+</div>
+
+<div class="table-wrap">
+  <table id="worksTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th style="width:20px;"></th>
+        <th style="min-width:160px;">标题 Title</th>
+        <th style="min-width:200px;">Vimeo 链接 / ID</th>
+        <th style="min-width:140px;">封面图文件名（自动）</th>
+        <th style="min-width:80px;">分类</th>
+        <th style="min-width:55px;">时长</th>
+        <th style="min-width:80px;">客户</th>
+        <th style="min-width:55px;">年份</th>
+        <th style="min-width:60px;">状态</th>
+        <th style="min-width:80px;">操作</th>
+      </tr>
+    </thead>
+    <tbody id="worksBody"></tbody>
+  </table>
+</div>
+
+<div id="checklistSection" style="display:none;margin:0 32px 16px;padding:16px 20px;background:var(--white);border:1px solid var(--bc-faint);">
+  <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--bc-dim);margin-bottom:12px;">
+    需要上传到 <code style="background:var(--bc-faint);padding:2px 6px;font-size:11px;">images/works/</code> 的封面图文件（共 <span id="checkCount"></span> 张）
+  </div>
+  <div id="uploadChecklist" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+</div>
+
+<div class="output-section">
+  <div class="output-header">
+    <div class="output-title">生成的 Works 数组代码（发给 Claude 即可）</div>
+    <button class="btn btn-sm btn-add" onclick="copyOutput()">📋 复制全部</button>
+  </div>
+  <div class="output-body" id="outputBody">← 点击右上角「生成代码」按钮</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DEFAULT DATA ─────────────────────────────────────────
+const DEFAULT_WORKS = [
+  { title:"Azuki Wake Up",                    vimeo:"", cat:"commercial", aspect:"wide",   duration:"", client:"Azuki",        year:"" },
+  { title:"Beanz Fight",                      vimeo:"", cat:"commercial", aspect:"wide",   duration:"", client:"Beanz",        year:"" },
+  { title:"Bobo's Proposal",                  vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Bobu's Gift",                      vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"BROWN x BEANZ Winter Wonderland",  vimeo:"", cat:"commercial", aspect:"wide",   duration:"", client:"Beanz",        year:"" },
+  { title:"Encounter",                        vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Five Elements",                    vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Freedom",                          vimeo:"", cat:"original",   aspect:"tall",   duration:"", client:"",             year:"" },
+  { title:"House of Lee",                     vimeo:"", cat:"commercial", aspect:"wide",   duration:"", client:"House of Lee", year:"" },
+  { title:"L&B",                              vimeo:"", cat:"commercial", aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Meet by Chance",                   vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Merge",                            vimeo:"", cat:"original",   aspect:"square", duration:"", client:"",             year:"" },
+  { title:"Muri",                             vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"My Friend Frankenstein",           vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Neon Garden Part 1",               vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Neon Garden Part 2",               vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Neon Garden Part 3",               vimeo:"", cat:"original",   aspect:"square", duration:"", client:"",             year:"" },
+  { title:"Neon Garden Part 4",               vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"PAWA",                             vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"PAWA 2",                           vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Peers",                            vimeo:"", cat:"original",   aspect:"tall",   duration:"", client:"",             year:"" },
+  { title:"Persona",                          vimeo:"", cat:"music",      aspect:"square", duration:"", client:"",             year:"" },
+  { title:"Stop the Rain",                    vimeo:"", cat:"music",      aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"The Origin",                       vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"The Return of Bobu",               vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Update the System",                vimeo:"", cat:"original",   aspect:"wide",   duration:"", client:"",             year:"" },
+  { title:"Valeria",                          vimeo:"", cat:"original",   aspect:"tall",   duration:"", client:"",             year:"" }
+];
+
+const DATA_VERSION = 'v3-27titles';
+let works = (() => {
+  if (localStorage.getItem('su_works_version') !== DATA_VERSION) {
+    localStorage.removeItem('su_works');
+    localStorage.setItem('su_works_version', DATA_VERSION);
+  }
+  return JSON.parse(localStorage.getItem('su_works') || 'null') || DEFAULT_WORKS.map(w => ({...w}));
+})();
+
+// ─── RENDER TABLE ─────────────────────────────────────────
+function render() {
+  const tbody = document.getElementById('worksBody');
+  tbody.innerHTML = '';
+  works.forEach((w, i) => {
+    const tr = document.createElement('tr');
+    tr.draggable = true;
+    tr.dataset.idx = i;
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td><span class="drag-handle" title="拖拽排序">⠿</span></td>
+      <td><input value="${esc(w.title)}" onchange="works[${i}].title=this.value;save()" placeholder="作品标题"></td>
+      <td><input value="${esc(w.vimeo)}" onchange="works[${i}].vimeo=parseVimeo(this.value);this.value=works[${i}].vimeo;save();renderStats()" placeholder="粘贴链接或只填数字ID"></td>
+      <td style="font-family:'Courier New',monospace;font-size:11px;color:var(--bc-dim);">${autoThumb(w.title)}</td>
+      <td>
+        <select onchange="works[${i}].cat=this.value;save()">
+          ${['commercial','music','original','game','mg'].map(c=>`<option ${w.cat===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+
+      <td><input value="${esc(w.duration)}" onchange="works[${i}].duration=this.value;save()" placeholder="00:00" style="max-width:56px"></td>
+      <td><input value="${esc(w.client)}" onchange="works[${i}].client=this.value;save()" placeholder="—"></td>
+      <td><input value="${esc(w.year)}" onchange="works[${i}].year=this.value;save()" placeholder="2024" style="max-width:48px"></td>
+      <td>${w.vimeo ? '<span class="badge badge-ready">✓ 已填</span>' : '<span class="badge badge-pending">待填</span>'}</td>
+      <td>
+        <div class="row-actions">
+          <button class="btn-sm btn-up" onclick="moveRow(${i},-1)" title="上移">↑</button>
+          <button class="btn-sm btn-dn" onclick="moveRow(${i},1)" title="下移">↓</button>
+          <button class="btn-sm btn-del" onclick="deleteRow(${i})">删除</button>
+        </div>
+      </td>`;
+
+    // drag events
+    tr.addEventListener('dragstart', e => { e.dataTransfer.effectAllowed='move'; dragSrc=i; tr.classList.add('dragging'); });
+    tr.addEventListener('dragend',   () => { tr.classList.remove('dragging'); document.querySelectorAll('tr.drag-over').forEach(r=>r.classList.remove('drag-over')); });
+    tr.addEventListener('dragover',  e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; tr.classList.add('drag-over'); });
+    tr.addEventListener('dragleave', () => tr.classList.remove('drag-over'));
+    tr.addEventListener('drop',      e => { e.preventDefault(); tr.classList.remove('drag-over'); if(dragSrc!==i){const tmp=works.splice(dragSrc,1)[0];works.splice(i,0,tmp);save();render();} });
+
+    tbody.appendChild(tr);
+  });
+  renderStats();
+}
+
+let dragSrc = -1;
+
+function renderStats() {
+  document.getElementById('stat-total').textContent = works.length;
+  const ready = works.filter(w=>w.vimeo).length;
+  document.getElementById('stat-ready').textContent = ready;
+  document.getElementById('stat-pending').textContent = works.length - ready;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+function esc(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function autoThumb(title) {
+  if (!title) return '(填写片名后自动生成)';
+  return slugify(title) + '.jpg';
+}
+
+function parseVimeo(input) {
+  if (!input) return '';
+  input = input.trim();
+  // Already a full embed URL
+  if (input.includes('player.vimeo.com/video/')) return input;
+  // vimeo.com/123456789
+  const m = input.match(/vimeo\.com\/(\d+)/);
+  if (m) return `https://player.vimeo.com/video/${m[1]}`;
+  // Just a number
+  if (/^\d+$/.test(input)) return `https://player.vimeo.com/video/${input}`;
+  return input;
+}
+
+function slugify(s) {
+  return s.toLowerCase().replace(/[×—]/g,' ').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function save() {
+  localStorage.setItem('su_works', JSON.stringify(works));
+}
+
+function addRow() {
+  works.push({ title:'', vimeo:'', thumb:'', cat:'commercial', aspect:'wide', duration:'', client:'', year: new Date().getFullYear().toString() });
+  save(); render();
+  // scroll to bottom
+  setTimeout(()=>{ const t=document.getElementById('worksTable'); t.scrollIntoView({block:'end',behavior:'smooth'}); },50);
+}
+
+function deleteRow(i) {
+  if (!confirm(`删除「${works[i].title || '(空行)'}」？`)) return;
+  works.splice(i, 1);
+  save(); render();
+}
+
+function moveRow(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= works.length) return;
+  [works[i], works[j]] = [works[j], works[i]];
+  save(); render();
+}
+
+// ─── BULK FILL ────────────────────────────────────────────
+function bulkFill() {
+  const raw = document.getElementById('bulk-input').value.trim();
+  if (!raw) return;
+  // format: "1:123456 2:789012" or "1：123456" or "1- 123456"
+  const pairs = raw.match(/(\d+)\s*[:\-：]\s*(\d+)/g);
+  if (!pairs) { toast('格式有误，请用「编号:视频ID」例如 1:123456789'); return; }
+  let count = 0;
+  pairs.forEach(p => {
+    const [, num, id] = p.match(/(\d+)\s*[:\-：]\s*(\d+)/);
+    const idx = parseInt(num) - 1;
+    if (idx >= 0 && idx < works.length) {
+      works[idx].vimeo = `https://player.vimeo.com/video/${id}`;
+      count++;
+    }
+  });
+  save(); render();
+  document.getElementById('bulk-input').value = '';
+  toast(`已填入 ${count} 条 Vimeo 链接`);
+}
+
+// ─── GENERATE OUTPUT ──────────────────────────────────────
+function generateOutput() {
+  const lines = [];
+  lines.push('// ══════════════════════════════════════════');
+  lines.push('// 以下是更新后的 works 数组，发给 Claude 后');
+  lines.push('// 它会自动替换 index.html 中的对应内容');
+  lines.push('// ══════════════════════════════════════════');
+  lines.push('');
+  lines.push('works: [');
+  works.forEach((w, i) => {
+    const id = slugify(w.title) || `work-${i+1}`;
+    const cat = w.cat || 'commercial';
+    const catLabels = { commercial:'Commercial', music:'Music Video', original:'Original', game:'Game', mg:'Motion Graphic' };
+    const catZh    = { commercial:'商业片', music:'MV', original:'原创', game:'游戏', mg:'动态图形' };
+    const vimeo = w.vimeo || `https://player.vimeo.com/video/XXXXXXX`;
+    const thumbFile = autoThumb(w.title);
+    const thumb = `images/works/${thumbFile}`;
+    const comma = i < works.length - 1 ? ',' : '';
+    lines.push(`  { id:"${id}", title:"${(w.title||'').replace(/"/g,'\\"')}", cat:"${cat}", catLabel:{en:"${catLabels[cat]||cat}",zh:"${catZh[cat]||cat}"}, duration:"${w.duration||'00:00'}", client:"${w.client||''}", year:"${w.year||''}", vimeo:"${vimeo}", thumb:"${thumb}", aspect:"wide" }${comma}`);
+  });
+  lines.push(']');
+
+  const out = lines.join('\n');
+  document.getElementById('outputBody').textContent = out;
+
+  // generate upload checklist
+  const checklist = document.getElementById('uploadChecklist');
+  const missing = works.filter(w => w.title);
+  checklist.innerHTML = missing.map(w => {
+    const fname = autoThumb(w.title);
+    return `<span class="check-item">📁 ${fname}</span>`;
+  }).join('');
+  document.getElementById('checkCount').textContent = missing.length;
+  document.getElementById('checklistSection').style.display = 'block';
+
+  document.querySelector('.output-section').scrollIntoView({ behavior: 'smooth' });
+  toast('代码已生成，点「复制全部」后发给 Claude');
+}
+
+function copyOutput() {
+  const text = document.getElementById('outputBody').textContent;
+  if (!text || text.startsWith('←')) { toast('请先点击「生成代码」'); return; }
+  navigator.clipboard.writeText(text).then(() => toast('已复制到剪贴板 ✓'));
+}
+
+function importFromDataJS() {
+  toast('把 data.js 的 works 数组内容粘贴到控制台：su_import(yourArray)');
+}
+
+window.su_import = function(arr) {
+  works = arr.map(w => ({
+    title: w.title || '',
+    vimeo: w.vimeo || '',
+    thumb: (w.thumb||'').replace('images/works/',''),
+    cat:   w.cat || 'commercial',
+    aspect:w.aspect || 'wide',
+    duration: w.duration || '',
+    client: w.client || '',
+    year:  w.year || ''
+  }));
+  save(); render(); generateOutput();
+  alert('导入成功！');
+};
+
+// ─── TOAST ────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
