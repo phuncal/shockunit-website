@@ -865,6 +865,8 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:20000;align-items:center;justify-content:center;">
   <div class="video-modal-shell">
     
+    <button onclick="openPlayerFullscreen()" style="position:absolute;top:12px;right:108px;z-index:10;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.7);background:rgba(0,0,0,.5);border:none;cursor:pointer;padding:6px 12px;">⛶ FULLSCREEN</button>
+    
     <button onclick="closeModal()" style="position:absolute;top:12px;right:12px;z-index:10;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.7);background:rgba(0,0,0,.5);border:none;cursor:pointer;padding:6px 12px;">✕ CLOSE</button>
     
     <iframe id="mFrame" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:block;" allowfullscreen allow="autoplay"></iframe>
@@ -1294,6 +1296,17 @@ function openModal(url) {
 function closeModal() {
   document.getElementById('modal').style.display = 'none';
   document.getElementById('mFrame').src = '';
+}
+function openPlayerFullscreen() {
+  const shell = document.querySelector('#modal .video-modal-shell');
+  if (!shell) return;
+  if (shell.requestFullscreen) {
+    shell.requestFullscreen();
+  } else if (shell.webkitRequestFullscreen) {
+    shell.webkitRequestFullscreen();
+  } else if (shell.msRequestFullscreen) {
+    shell.msRequestFullscreen();
+  }
 }
 function toggleMobileMenu() {
   const m = document.getElementById('mobileMenu');
