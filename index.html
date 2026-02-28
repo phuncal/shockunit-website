@@ -1479,7 +1479,12 @@ async function setupVmPlayer() {
   if (!vmIsVimeo || !window.Vimeo || !window.Vimeo.Player) return;
   const frame = document.getElementById('mFrame');
   if (!frame) return;
-  vmPlayer = new window.Vimeo.Player(frame);
+  try {
+    vmPlayer = new window.Vimeo.Player(frame);
+  } catch {
+    vmPlayer = null;
+    return;
+  }
 
   vmPlayer.on('play', () => { vmPaused = false; syncVmButtons(); });
   vmPlayer.on('pause', () => { vmPaused = true; syncVmButtons(); });
@@ -1522,10 +1527,11 @@ async function setupVmPlayer() {
 }
 
 function destroyVmPlayer() {
-  if (!vmPlayer) return;
-  vmPlayer.unload().catch(() => {});
-  vmPlayer.destroy().catch(() => {});
+  const player = vmPlayer;
   vmPlayer = null;
+  if (!player) return;
+  player.unload().catch(() => {});
+  player.destroy().catch(() => {});
 }
 
 function openModal(url) {
@@ -1547,7 +1553,10 @@ function openModal(url) {
 
   const frame = document.getElementById('mFrame');
   destroyVmPlayer();
-  frame.onload = () => { if (vmIsVimeo) setupVmPlayer(); };
+  frame.onload = () => {
+    if (vmIsVimeo && frame.src.includes('player.vimeo.com/video/')) setupVmPlayer();
+    frame.onload = null;
+  };
   frame.src = src;
 
   document.getElementById('vmControls').style.display = vmIsVimeo ? 'flex' : 'none';
@@ -1565,10 +1574,13 @@ function closeModal() {
   vmDuration = 0;
   vmCurrent = 0;
   vmSeeking = false;
+  vmIsVimeo = false;
   syncVmProgress();
   document.getElementById('vmControls').style.display = 'none';
   document.getElementById('modal').style.display = 'none';
-  document.getElementById('mFrame').src = '';
+  const frame = document.getElementById('mFrame');
+  frame.onload = null;
+  frame.src = 'about:blank';
 }
 function toggleModalFullscreen() {
   const shell = document.querySelector('#modal .video-modal-shell');
