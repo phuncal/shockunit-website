@@ -5,7 +5,7 @@
 ```
 shockunit-website/
 ├── index.html              ← 网站主文件（包含所有页面和逻辑）
-├── data.js                 ← 内容数据（部署时使用，本地预览用内联版本）
+├── data.js                 ← 内容数据（本地与部署统一读取）
 ├── SKILL.md                ← Claude Code 维护手册
 ├── README.md               ← 本文件
 └── images/
@@ -26,10 +26,18 @@ shockunit-website/
 
 ## 本地预览
 
-直接用浏览器打开 `index.html` 即可，无需服务器。
+不要直接双击 `index.html`，浏览器安全策略会阻止加载外部 `data.js`。
 
-> **说明**：本地预览时使用 `index.html` 内嵌的数据，不依赖外部 `data.js`。
-> 部署到服务器后，`index.html` 会加载外部 `data.js`，两者需保持同步。
+请使用本地服务器预览：
+
+```bash
+# 方法一：VS Code 安装 Live Server 插件，右键 index.html → Open with Live Server
+# 方法二：命令行
+python3 -m http.server 8080
+# 然后打开 http://localhost:8080
+```
+
+> **说明**：网站运行时统一读取外部 `data.js`，内容更新只需维护该文件。
 
 ---
 
@@ -55,6 +63,27 @@ git commit -m "描述修改内容"
 git push
 ```
 Cloudflare 会自动重新部署，约1分钟生效。
+
+---
+
+## 推荐内容更新流程（works.json 单一数据源）
+
+1. 打开 `works-manager.html`，通过表格新增/编辑作品
+2. 拖拽行调整顺序（即网站播放顺序）
+3. 点击「导出 works.json」
+4. 将导出的 `works.json` 放到项目根目录
+5. 在项目根目录执行：
+
+```bash
+node scripts/validate-works.js
+node scripts/sync-works-to-data.js
+```
+
+6. 预览确认后提交并推送
+
+说明：
+- `scripts/validate-works.js`：校验字段、链接、封面路径（默认缺图只警告）
+- `scripts/sync-works-to-data.js`：把 `works.json` 确定性写入 `data.js` 的 `works` 字段
 
 ---
 

@@ -267,15 +267,17 @@ tr:hover .drag-handle { color: var(--bc-dim); }
     </div>
   </div>
   <div class="header-actions">
-    <button class="btn btn-secondary" onclick="importFromDataJS()">📂 导入现有数据</button>
-    <button class="btn btn-primary" onclick="generateOutput()">⚡ 生成代码 → 复制给 Claude</button>
+    <button class="btn btn-secondary" onclick="triggerImportJson()">📂 导入 works.json</button>
+    <button class="btn btn-secondary" onclick="importFromDataJS()">📥 从 data.js 导入</button>
+    <button class="btn btn-primary" onclick="exportWorksJson()">💾 导出 works.json</button>
   </div>
 </header>
+<input id="importJsonInput" type="file" accept="application/json" style="display:none" onchange="importWorksJsonFile(event)">
 
 <div class="help-bar">
   <strong>使用方法：</strong>
-  填写表格 → 点击「生成代码」→ 把生成的内容发给 Claude，Claude 会自动更新网站。
-  拖拽行可调整顺序，编号自动重排。
+  填写表格（可新增）→ 拖拽行调整播放顺序 → 导出 <code>works.json</code>。
+  然后在项目目录执行：<code>node scripts/validate-works.js</code> 和 <code>node scripts/sync-works-to-data.js</code>。
 </div>
 
 <div class="stats-bar">
@@ -324,10 +326,10 @@ tr:hover .drag-handle { color: var(--bc-dim); }
 
 <div class="output-section">
   <div class="output-header">
-    <div class="output-title">生成的 Works 数组代码（发给 Claude 即可）</div>
+    <div class="output-title">works.json 预览</div>
     <button class="btn btn-sm btn-add" onclick="copyOutput()">📋 复制全部</button>
   </div>
-  <div class="output-body" id="outputBody">← 点击右上角「生成代码」按钮</div>
+  <div class="output-body" id="outputBody">← 点击右上角「导出 works.json」按钮</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -386,7 +388,7 @@ function render() {
       <td><span class="drag-handle" title="拖拽排序">⠿</span></td>
       <td><input value="${esc(w.title)}" onchange="works[${i}].title=this.value;save()" placeholder="作品标题"></td>
       <td><input value="${esc(w.vimeo)}" onchange="works[${i}].vimeo=parseVimeo(this.value);this.value=works[${i}].vimeo;save();renderStats()" placeholder="粘贴链接或只填数字ID"></td>
-      <td style="font-family:'Courier New',monospace;font-size:11px;color:var(--bc-dim);">${autoThumb(w.title)}</td>
+      <td style="font-family:'Courier New',monospace;font-size:11px;color:var(--bc-dim);">${((w.thumb||'').trim() || `images/works/${slugify(w.title||'') || ('work-' + (i+1))}.jpg`).replace('images/works/','')}</td>
       <td>
         <select onchange="works[${i}].cat=this.value;save()">
           ${['commercial','music','original','game','mg'].map(c=>`<option ${w.cat===c?'selected':''}>${c}</option>`).join('')}
@@ -498,47 +500,120 @@ function bulkFill() {
 
 // ─── GENERATE OUTPUT ──────────────────────────────────────
 function generateOutput() {
-  const lines = [];
-  lines.push('// ══════════════════════════════════════════');
-  lines.push('// 以下是更新后的 works 数组，发给 Claude 后');
-  lines.push('// 它会自动替换 index.html 中的对应内容');
-  lines.push('// ══════════════════════════════════════════');
-  lines.push('');
-  lines.push('works: [');
-  works.forEach((w, i) => {
-    const id = slugify(w.title) || `work-${i+1}`;
-    const cat = w.cat || 'commercial';
-    const catLabels = { commercial:'Commercial', music:'Music Video', original:'Original', game:'Game', mg:'Motion Graphic' };
-    const catZh    = { commercial:'商业片', music:'MV', original:'原创', game:'游戏', mg:'动态图形' };
-    const vimeo = w.vimeo || `https://player.vimeo.com/video/XXXXXXX`;
-    const thumbFile = autoThumb(w.title);
-    const thumb = `images/works/${thumbFile}`;
-    const comma = i < works.length - 1 ? ',' : '';
-    lines.push(`  { id:"${id}", title:"${(w.title||'').replace(/"/g,'\\"')}", cat:"${cat}", catLabel:{en:"${catLabels[cat]||cat}",zh:"${catZh[cat]||cat}"}, duration:"${w.duration||'00:00'}", client:"${w.client||''}", year:"${w.year||''}", vimeo:"${vimeo}", thumb:"${thumb}", aspect:"wide" }${comma}`);
-  });
-  lines.push(']');
-
-  const out = lines.join('\n');
+  const payload = {
+    version: 1,
+    works: getSerializableWorks()
+  };
+  const out = JSON.stringify(payload, null, 2);
   document.getElementById('outputBody').textContent = out;
 
   // generate upload checklist
   const checklist = document.getElementById('uploadChecklist');
-  const missing = works.filter(w => w.title);
-  checklist.innerHTML = missing.map(w => {
-    const fname = autoThumb(w.title);
+  const exportRows = getSerializableWorks().filter(w => w.title);
+  checklist.innerHTML = exportRows.map(w => {
+    const fname = (w.thumb || '').replace('images/works/', '');
     return `<span class="check-item">📁 ${fname}</span>`;
   }).join('');
-  document.getElementById('checkCount').textContent = missing.length;
+  document.getElementById('checkCount').textContent = exportRows.length;
   document.getElementById('checklistSection').style.display = 'block';
 
   document.querySelector('.output-section').scrollIntoView({ behavior: 'smooth' });
-  toast('代码已生成，点「复制全部」后发给 Claude');
+  toast('works.json 预览已更新');
 }
 
 function copyOutput() {
   const text = document.getElementById('outputBody').textContent;
-  if (!text || text.startsWith('←')) { toast('请先点击「生成代码」'); return; }
+  if (!text || text.startsWith('←')) { toast('请先点击「导出 works.json」'); return; }
   navigator.clipboard.writeText(text).then(() => toast('已复制到剪贴板 ✓'));
+}
+
+function getSerializableWorks() {
+  const catLabels = {
+    commercial: { en: 'Commercial', zh: '商业片' },
+    music: { en: 'Music Video', zh: 'MV' },
+    original: { en: 'Original', zh: '原创' },
+    game: { en: 'Game', zh: '游戏' },
+    mg: { en: 'Motion Graphic', zh: '动态图形' }
+  };
+  return works.map((w, i) => {
+    const title = (w.title || '').trim();
+    const id = (w.id || '').trim() || slugify(title) || `work-${i + 1}`;
+    const cat = (w.cat || 'commercial').trim() || 'commercial';
+    const thumb = (w.thumb || '').trim() || `images/works/${id}.jpg`;
+    const catLabel = w.catLabel && w.catLabel.en && w.catLabel.zh ? w.catLabel : (catLabels[cat] || { en: cat, zh: cat });
+    return {
+      id,
+      title,
+      cat,
+      catLabel,
+      duration: (w.duration || '').trim(),
+      client: (w.client || '').trim(),
+      year: (w.year || '').trim(),
+      vimeo: parseVimeo((w.vimeo || '').trim()),
+      thumb,
+      aspect: (w.aspect || 'wide').trim() || 'wide'
+    };
+  });
+}
+
+function exportWorksJson() {
+  const payload = {
+    version: 1,
+    works: getSerializableWorks()
+  };
+  const text = JSON.stringify(payload, null, 2) + '\n';
+  document.getElementById('outputBody').textContent = text;
+
+  const blob = new Blob([text], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'works.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  document.querySelector('.output-section').scrollIntoView({ behavior: 'smooth' });
+  toast('已导出 works.json');
+}
+
+function triggerImportJson() {
+  const input = document.getElementById('importJsonInput');
+  input.value = '';
+  input.click();
+}
+
+function importWorksJsonFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const rows = Array.isArray(parsed) ? parsed : parsed.works;
+      if (!Array.isArray(rows)) throw new Error('works.json 需要是数组或 { works: [] }');
+      works = rows.map((w, i) => ({
+        id: w.id || '',
+        title: w.title || '',
+        vimeo: parseVimeo(w.vimeo || ''),
+        thumb: w.thumb || '',
+        cat: w.cat || 'commercial',
+        catLabel: w.catLabel || null,
+        aspect: w.aspect || 'wide',
+        duration: w.duration || '',
+        client: w.client || '',
+        year: w.year || ''
+      }));
+      save();
+      render();
+      generateOutput();
+      toast(`已导入 works.json（${works.length} 条）`);
+    } catch (err) {
+      toast(`导入失败：${err.message}`);
+    }
+  };
+  reader.readAsText(file);
 }
 
 function importFromDataJS() {
@@ -547,10 +622,12 @@ function importFromDataJS() {
 
 window.su_import = function(arr) {
   works = arr.map(w => ({
+    id: w.id || '',
     title: w.title || '',
     vimeo: w.vimeo || '',
-    thumb: (w.thumb||'').replace('images/works/',''),
+    thumb: w.thumb || '',
     cat:   w.cat || 'commercial',
+    catLabel: w.catLabel || null,
     aspect:w.aspect || 'wide',
     duration: w.duration || '',
     client: w.client || '',
@@ -570,6 +647,7 @@ function toast(msg) {
 
 // ─── INIT ─────────────────────────────────────────────────
 render();
+generateOutput();
 </script>
 </body>
 </html>

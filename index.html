@@ -660,6 +660,14 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
   width: 90vw; max-width: 1280px; aspect-ratio: 16/9; position: relative;
 }
 .trailer-wrap iframe { width: 100%; height: 100%; border: none; }
+.video-modal-shell {
+  position: relative;
+  width: min(92vw, 1280px);
+  aspect-ratio: 16/9;
+  max-height: 88vh;
+  overflow: hidden;
+  background: #000;
+}
 .trailer-label {
   margin-top: 20px; font-family: 'Space Mono', monospace; font-size: 9px;
   letter-spacing: .3em; color: rgba(144,175,189,.25); text-transform: uppercase;
@@ -856,7 +864,7 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 
 <!-- VIDEO MODAL -->
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:20000;align-items:center;justify-content:center;">
-  <div style="position:relative;width:85vw;max-width:1080px;aspect-ratio:16/9;overflow:hidden;background:#000;transform:translateZ(0);isolation:isolate;">
+  <div class="video-modal-shell">
     
     <button onclick="closeModal()" style="position:absolute;top:12px;right:12px;z-index:10;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.7);background:rgba(0,0,0,.5);border:none;cursor:pointer;padding:6px 12px;">✕ CLOSE</button>
     
@@ -1069,9 +1077,9 @@ function renderContact() {
           ${steps}
         </div>
         <div class="socials-row">
-          <a class="social-a" href="${social.twitter}" target="_blank">X / Twitter</a>
-          <a class="social-a" href="${social.youtube}" target="_blank">YouTube</a>
-          <a class="social-a" href="${social.instagram}" target="_blank">Instagram</a>
+          <a class="social-a" href="${social.twitter}" target="_blank" rel="noopener noreferrer">X / Twitter</a>
+          <a class="social-a" href="${social.youtube}" target="_blank" rel="noopener noreferrer">YouTube</a>
+          <a class="social-a" href="${social.instagram}" target="_blank" rel="noopener noreferrer">Instagram</a>
         </div>
       </div>
       <div class="contact-r">
@@ -1105,7 +1113,7 @@ function renderGame() {
 
   // 主入口按钮：加入愿望单（最重要的 CTA）
   const wishlistBtn = steamUrl
-    ? `<a class="btn-steam" href="${steamUrl}" target="_blank">
+    ? `<a class="btn-steam" href="${steamUrl}" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0z"/></svg>
         ${LANG==='en'?'Add to Wishlist on Steam':'在 Steam 加入愿望单'}
       </a>`
@@ -1116,7 +1124,7 @@ function renderGame() {
 
   // 次要按钮：直达 Steam 商店页
   const viewOnSteamBtn = steamUrl
-    ? `<a class="btn btn-game-out" href="${steamUrl}" target="_blank">
+    ? `<a class="btn btn-game-out" href="${steamUrl}" target="_blank" rel="noopener noreferrer">
         ${LANG==='en'?'View on Steam →':'查看 Steam 页面 →'}
       </a>`
     : '';
@@ -1264,9 +1272,23 @@ function renderAll() {
 // ════════════════════════════════════════
 //  VIDEO MODAL
 // ════════════════════════════════════════
+function withEmbedParams(rawUrl, extraParams = {}) {
+  try {
+    const u = new URL(rawUrl);
+    Object.entries(extraParams).forEach(([k, v]) => u.searchParams.set(k, v));
+    return u.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
 function openModal(url) {
   if (!url || url.includes('XXXXXXX')) return;
-  document.getElementById('mFrame').src = url + '?autoplay=1';
+  const isVimeo = /player\.vimeo\.com\/video\/\d+/.test(url);
+  const src = isVimeo
+    ? withEmbedParams(url, { autoplay: '1', title: '0', byline: '0', portrait: '0', speed: '0', pip: '0' })
+    : withEmbedParams(url, { autoplay: '1' });
+  document.getElementById('mFrame').src = src;
   const m = document.getElementById('modal');
   m.style.display = 'flex';
 }
@@ -1296,7 +1318,9 @@ function openTrailer(url) {
     embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
   } else if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
     const id = url.split('vimeo.com/')[1].split('?')[0];
-    embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1`;
+    embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1&title=0&byline=0&portrait=0&speed=0&pip=0`;
+  } else if (url.includes('player.vimeo.com/video/')) {
+    embedUrl = withEmbedParams(url, { autoplay: '1', title: '0', byline: '0', portrait: '0', speed: '0', pip: '0' });
   }
   document.getElementById('trailerFrame').src = embedUrl;
   document.getElementById('trailerModal').classList.add('open');
