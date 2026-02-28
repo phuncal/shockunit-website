@@ -662,9 +662,9 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 .trailer-wrap iframe { width: 100%; height: 100%; border: none; }
 .video-modal-shell {
   position: relative;
-  width: min(96vw, 1600px);
+  width: min(92vw, 1280px);
   aspect-ratio: 16/9;
-  height: min(90vh, calc(96vw * 9 / 16));
+  max-height: 88vh;
   overflow: hidden;
   background: #000;
 }
@@ -813,11 +813,6 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   .game-features { grid-template-columns: 1fr 1fr; gap: 10px; padding: 28px 20px; }
   .game-art-grid { grid-template-columns: 1fr; padding: 0 20px 40px; gap: 10px; }
   .game-cta { padding: 40px 20px; }
-  .video-modal-shell {
-    width: 100vw;
-    height: min(56.25vw, 78vh);
-  }
-
   /* ── FOOTER ── */
   footer { padding: 28px 20px; flex-direction: column; gap: 12px; text-align: center; }
   .footer-links { justify-content: center; flex-wrap: wrap; }
