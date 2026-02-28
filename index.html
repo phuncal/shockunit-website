@@ -15,6 +15,7 @@
 <meta name="twitter:site"        content="@shockunitstudio">
 <meta id="tw-title"       name="twitter:title"       content="SHOCKUNIT — Anime is a language.">
 <meta id="tw-image"       name="twitter:image"       content="images/hero-poster.jpg">
+<link rel="icon" type="image/png" href="images/shockunit_Favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@400;600;700&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
@@ -72,6 +73,7 @@ body::before {
   transform: translate(-50%,-50%);
   transition: transform .12s ease, opacity .2s;
 }
+@media (hover: none) { .cur-ring, #curDot, #curTrail { display: none !important; } * { cursor: auto !important; } }
 .cur-ring {
   position: fixed; width: 32px; height: 32px;
   border: 1.5px solid var(--bc); border-radius: 50%;
@@ -696,7 +698,6 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 /* Wide screens: constrain max and balance layout */
 @media (min-width: 1600px) {
   .home-wrap { grid-template-columns: 1fr 1fr; }
-  .home-left { padding-left: max(48px, calc((100vw - 1600px)/2 + 48px)); }
 }
 
 /* Tablet */
@@ -721,29 +722,34 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   /* Home */
   .home-wrap {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    height: auto;
-    min-height: 100svh;
-  }
-  .home-left {
-    padding: 100px 24px 40px;
-    order: 1;
+    height: 100svh;
+    grid-template-rows: 1fr auto;
   }
   .home-right {
+    order: 1;
+    height: 100%;
+  }
+  .home-left {
     order: 2;
-    height: 56vw;
-    min-height: 220px;
+    padding: 28px 24px 80px;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, var(--nebula) 60%, transparent 100%);
+    z-index: 10;
+    justify-content: flex-end;
   }
   .home-right::before {
-    background: linear-gradient(to bottom, var(--nebula) 0%, transparent 40%);
+    background: linear-gradient(to bottom, rgba(220,228,224,.3) 0%, transparent 30%);
   }
-  .home-title { font-size: clamp(52px, 13vw, 80px); }
-  .home-tagline { font-size: 14px; margin-bottom: 32px; padding-bottom: 32px; }
-  .home-actions { gap: 12px; }
-  .home-meta { left: 24px; bottom: 16px; gap: 24px; }
+  .home-title { font-size: clamp(48px, 14vw, 72px); }
+  .home-eyebrow { margin-bottom: 16px; }
+  .home-tagline { font-size: 13px; margin-bottom: 24px; padding-bottom: 24px; }
+  .home-actions { gap: 10px; }
+  .home-meta { left: 24px; bottom: 16px; gap: 24px; display: none; }
   .hm-stat .n { font-size: 24px; }
   .poster-info { padding: 20px 20px 24px; }
   .poster-game-title { font-size: 28px; }
+  .poster-img { width: 100%; height: 100%; }
 
   /* Work */
   .work-header { padding: 80px 20px 24px; flex-direction: column; gap: 8px; }
@@ -775,6 +781,22 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   /* Footer */
   footer { padding: 32px 20px; flex-direction: column; gap: 16px; text-align: center; }
   .footer-links { justify-content: center; }
+
+  /* Hamburger */
+  .nav-links { display: none; }
+  .hamburger { display: flex !important; }
+  .mobile-menu {
+    display: none;
+    position: fixed; inset: 0; top: 56px;
+    background: var(--nebula); z-index: 9000;
+    flex-direction: column; align-items: center; justify-content: center; gap: 40px;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-family: 'Bebas Neue', sans-serif; font-size: 48px;
+    color: var(--bc); text-decoration: none; letter-spacing: .05em;
+  }
+  .mobile-menu a:active, .mobile-menu a.active { color: var(--red); }
 }
 
 /* Very small phones */
@@ -798,6 +820,12 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 </div>
 
 <nav id="mainNav"></nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="navigate('home');closeMobileMenu();return false;" id="mm-home">HOME</a>
+  <a href="#" onclick="navigate('work');closeMobileMenu();return false;" id="mm-work">WORK</a>
+  <a href="#" onclick="navigate('about');closeMobileMenu();return false;" id="mm-about">ABOUT</a>
+  <a href="#" onclick="navigate('contact');closeMobileMenu();return false;" id="mm-contact">CONTACT</a>
+</div>
 
 <div class="page active" id="home"></div>
 <div class="page" id="work"></div>
@@ -817,7 +845,7 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 <!-- VIDEO MODAL -->
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:20000;align-items:center;justify-content:center;">
   <div style="position:relative;width:85vw;max-width:1080px;aspect-ratio:16/9;">
-    <button onclick="closeModal()" style="position:absolute;top:-44px;right:0;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--nebula);background:none;border:none;cursor:none;">✕ CLOSE</button>
+    <button onclick="closeModal()" style="position:absolute;top:12px;right:12px;z-index:10;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.7);background:rgba(0,0,0,.5);border:none;cursor:pointer;padding:6px 12px;">✕ CLOSE</button>
     <iframe id="mFrame" src="" style="width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
   </div>
 </div>
@@ -859,7 +887,12 @@ function renderNav() {
       <button class="lang-btn ${LANG==='en'?'active':''}" onclick="setLang('en')">EN</button>
       <span class="lang-sep">/</span>
       <button class="lang-btn ${LANG==='zh'?'active':''}" onclick="setLang('zh')">中</button>
-    </div>`;
+    </div>
+    <button class="hamburger" onclick="toggleMobileMenu()" style="display:none;background:none;border:none;padding:8px;margin-left:16px;cursor:pointer;flex-direction:column;gap:5px;align-items:center;justify-content:center;" id="hamburgerBtn">
+      <span style="display:block;width:22px;height:1.5px;background:var(--bc);transition:all .3s;"></span>
+      <span style="display:block;width:22px;height:1.5px;background:var(--bc);transition:all .3s;"></span>
+      <span style="display:block;width:14px;height:1.5px;background:var(--bc);transition:all .3s;align-self:flex-end;"></span>
+    </button>`;
   bindHover();
 }
 
@@ -1010,7 +1043,6 @@ function renderContact() {
           <div class="sec-eyebrow">${LANG==='en'?'Let\'s Talk':'开始合作'}</div>
           <div class="contact-title">${LANG==='en'?'START A<br><span>PROJECT</span>':'开始一个<br><span>项目</span>'}</div>
           <div class="contact-info">
-            <div><div class="ci-label">${LANG==='en'?'Email':'邮箱'}</div><div class="ci-val"><a href="mailto:${s.email}">${s.email}</a></div></div>
             <div><div class="ci-label">${LANG==='en'?'Location':'位置'}</div><div class="ci-val">${t(s.location)}</div></div>
             <div><div class="ci-label">${LANG==='en'?'Response Time':'回复时间'}</div><div class="ci-val">${LANG==='en'?'Within 48 hours':'48小时内'}</div></div>
           </div>
@@ -1225,6 +1257,14 @@ function closeModal() {
   document.getElementById('modal').style.display = 'none';
   document.getElementById('mFrame').src = '';
 }
+function toggleMobileMenu() {
+  const m = document.getElementById('mobileMenu');
+  m.classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
 document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
 
 function openTrailer(url) {
