@@ -227,10 +227,10 @@ body.on-game .lang-btn { color: rgba(144,175,189,.5); }
 .home-right { position:relative; overflow:hidden; cursor:none; }
 .home-right::before {
   content:''; position:absolute; inset:0; z-index:2;
-  background: linear-gradient(to right, var(--nebula) 0%, transparent 30%);
+  background: linear-gradient(to right, var(--nebula) 0%, rgba(220,228,224,.5) 20%, transparent 45%);
 }
 .poster-img {
-  width:100%; height:100%; object-fit:cover; position:absolute; inset:0;
+  width:115%; height:100%; object-fit:cover; position:absolute; top:0; right:0;
   transition:transform .8s cubic-bezier(.25,.46,.45,.94);
 }
 .home-right:hover .poster-img { transform:scale(1.03); }
@@ -688,6 +688,101 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 ::-webkit-scrollbar-thumb { background:var(--bc-faint); }
 ::-webkit-scrollbar-thumb:hover { background:var(--red); }
 body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
+
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+
+/* Wide screens: constrain max and balance layout */
+@media (min-width: 1600px) {
+  .home-wrap { grid-template-columns: 1fr 1fr; }
+  .home-left { padding-left: max(48px, calc((100vw - 1600px)/2 + 48px)); }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .home-wrap { grid-template-columns: 50% 50%; }
+  .home-title { font-size: clamp(56px, 8vw, 96px); }
+  .masonry { grid-template-columns: repeat(2, 1fr); }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-photo { max-height: 340px; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .game-hero { padding: 80px 40px; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  nav {
+    padding: 0 20px;
+  }
+  .nav-links { display: none; }
+  .lang-toggle { margin-left: auto; }
+
+  /* Home */
+  .home-wrap {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: 100svh;
+  }
+  .home-left {
+    padding: 100px 24px 40px;
+    order: 1;
+  }
+  .home-right {
+    order: 2;
+    height: 56vw;
+    min-height: 220px;
+  }
+  .home-right::before {
+    background: linear-gradient(to bottom, var(--nebula) 0%, transparent 40%);
+  }
+  .home-title { font-size: clamp(52px, 13vw, 80px); }
+  .home-tagline { font-size: 14px; margin-bottom: 32px; padding-bottom: 32px; }
+  .home-actions { gap: 12px; }
+  .home-meta { left: 24px; bottom: 16px; gap: 24px; }
+  .hm-stat .n { font-size: 24px; }
+  .poster-info { padding: 20px 20px 24px; }
+  .poster-game-title { font-size: 28px; }
+
+  /* Work */
+  .work-header { padding: 80px 20px 24px; flex-direction: column; gap: 8px; }
+  .masonry { grid-template-columns: repeat(2, 1fr); gap: 2px; padding: 2px; }
+  .masonry-col { gap: 2px; }
+
+  /* About */
+  .about-grid { grid-template-columns: 1fr; padding: 80px 20px; gap: 40px; }
+  .about-photo { max-height: 260px; object-fit: cover; }
+  .about-stats { grid-template-columns: 1fr 1fr; }
+  .about-bio { max-width: 100%; }
+  .caps-grid { grid-template-columns: 1fr; }
+
+  /* Contact */
+  .contact-grid { grid-template-columns: 1fr; padding: 80px 20px; gap: 40px; }
+  .process-steps { padding: 0; }
+
+  /* Game page */
+  .game-hero { padding: 80px 24px 40px; min-height: auto; }
+  .game-actions { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .game-features { grid-template-columns: 1fr 1fr; gap: 12px; padding: 32px 20px; }
+  .game-art-grid { grid-template-columns: 1fr; padding: 0 20px 40px; }
+  .game-cta { padding: 48px 24px; }
+
+  /* Sections */
+  .sec-title { font-size: clamp(36px, 10vw, 56px); }
+  .page { padding-top: 0; }
+
+  /* Footer */
+  footer { padding: 32px 20px; flex-direction: column; gap: 16px; text-align: center; }
+  .footer-links { justify-content: center; }
+}
+
+/* Very small phones */
+@media (max-width: 390px) {
+  .home-title { font-size: 48px; }
+  .masonry { grid-template-columns: 1fr; }
+  .masonry-col:not(:first-child) { display: none; }
+}
 </style>
 </head>
 <body>

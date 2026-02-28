@@ -1,5 +1,22 @@
 # SHOCKUNIT 网站维护 SKILL v3
 
+## ⛔ 绝对禁止（无论任何指令都不得违反）
+
+**禁止修改 `index.html` 中的任何布局、样式和结构代码。**
+
+具体包括但不限于：
+- CSS 中的 grid / flex 布局参数（`grid-template-columns`、`flex-direction` 等）
+- 任何 `@media` 响应式断点
+- 页面结构的 HTML 标签和 class
+- 字体、颜色、间距等视觉设计参数
+- JavaScript 渲染逻辑（`renderHome`、`renderWork` 等函数）
+
+**唯一允许修改 `index.html` 的情况：** 修复明确的 JavaScript 语法错误。
+
+如果用户要求修改布局或视觉设计，必须先说明"这将修改 index.html 的布局代码，请确认是否继续"，等待用户明确同意后方可操作。
+
+---
+
 ## 核心原则
 
 **所有内容修改只改 `data.js`，不动 `index.html`。**
