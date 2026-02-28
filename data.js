@@ -100,7 +100,7 @@ const SITE_DATA = {
 
   // ─── Contact ──────────────────────────────────────────────
   contact: {
-    formspreeUrl: "https://formspree.io/f/YOUR_FORM_ID",
+    formspreeUrl: "https://formspree.io/f/xgolqydv",
     process: [
       { en: { title: "Brief & Discovery",     desc: "Tell us about your project — goals, timeline, and references." },  zh: { title: "简报 & 沟通",  desc: "告诉我们你的项目目标、时间线和参考资料。" } },
       { en: { title: "Proposal & Quote",      desc: "We assess scope and send a detailed production proposal." },        zh: { title: "方案 & 报价",  desc: "我们评估项目规模，发送详细的制作方案和报价。" } },
