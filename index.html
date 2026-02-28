@@ -69,7 +69,7 @@ body::before {
 .cur-dot {
   position: fixed; width: 8px; height: 8px;
   background: var(--red); border-radius: 50%;
-  pointer-events: none; z-index: 9990;
+  pointer-events: none; z-index: 30010;
   transform: translate(-50%,-50%);
   transition: transform .12s ease, opacity .2s;
 }
@@ -77,12 +77,12 @@ body::before {
 .cur-ring {
   position: fixed; width: 32px; height: 32px;
   border: 1.5px solid var(--bc); border-radius: 50%;
-  pointer-events: none; z-index: 9989;
+  pointer-events: none; z-index: 30009;
   transform: translate(-50%,-50%);
   transition: width .3s, height .3s, border-color .3s, opacity .3s;
 }
 .cur-trail {
-  position: fixed; pointer-events: none; z-index: 9988;
+  position: fixed; pointer-events: none; z-index: 30008;
 }
 .cur-trail span {
   position: absolute; width: 3px; height: 3px;
@@ -696,38 +696,94 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
   background: rgba(0,0,0,.72);
 }
 .video-modal-close { top: 12px; right: 12px; }
-.video-modal-fs { top: 12px; right: 108px; }
-
 .video-controls {
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
   z-index: 12;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 12px;
+  background: rgba(0,0,0,.48);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.video-progress-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.video-progress {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(248,246,243,.24);
+  outline: none;
+  cursor: none;
+}
+.video-progress::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  background: var(--red);
+}
+.video-progress::-moz-range-track {
+  height: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(248,246,243,.24);
+}
+.video-progress::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  background: var(--red);
+}
+.video-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  color: rgba(248,246,243,.72);
+  white-space: nowrap;
+}
+.video-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.video-controls-left,
+.video-controls-right {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
-  background: rgba(0,0,0,.56);
-  border: 1px solid rgba(255,255,255,.12);
 }
 .video-ctrl {
   font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .16em;
+  font-size: 9px;
+  letter-spacing: .18em;
   color: rgba(255,255,255,.8);
   background: transparent;
-  border: 1px solid rgba(255,255,255,.24);
-  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  padding: 6px 10px;
   text-transform: uppercase;
   cursor: none;
 }
 .video-ctrl.on {
-  border-color: rgba(255,255,255,.55);
+  border-color: var(--red);
+  color: var(--red);
+}
+.video-ctrl:hover {
+  border-color: rgba(248,246,243,.48);
   color: #fff;
 }
 .video-ctrl:disabled {
-  opacity: .4;
+  display: none;
 }
 .trailer-label {
   margin-top: 20px; font-family: 'Space Mono', monospace; font-size: 9px;
@@ -928,16 +984,25 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:20000;align-items:center;justify-content:center;">
   <div class="video-modal-shell">
     
-    <button id="vmFullscreenBtn" class="video-modal-btn video-modal-fs" onclick="toggleModalFullscreen()">⛶ FULLSCREEN</button>
-    
-    <button class="video-modal-btn video-modal-close" onclick="closeModal()">✕ CLOSE</button>
+    <button class="video-modal-btn video-modal-close no-cursor-grow" onclick="closeModal()">✕ CLOSE</button>
     
     <iframe id="mFrame" class="video-modal-frame" src="" allowfullscreen allow="autoplay"></iframe>
     
     <div id="vmControls" class="video-controls" style="display:none;">
-      <button id="vmPlayBtn" class="video-ctrl" onclick="toggleModalPlay()">Pause</button>
-      <button id="vmMuteBtn" class="video-ctrl" onclick="toggleModalMute()">Mute</button>
-      <button id="vmCcBtn" class="video-ctrl" onclick="toggleModalCaptions()">CC Off</button>
+      <div class="video-progress-line">
+        <input id="vmProgress" class="video-progress no-cursor-grow" type="range" min="0" max="100" value="0" step="0.1" oninput="onVmProgressInput(this.value)" onchange="onVmProgressCommit(this.value)">
+        <span id="vmTime" class="video-time">00:00 / 00:00</span>
+      </div>
+      <div class="video-controls-row">
+        <div class="video-controls-left">
+          <button id="vmPlayBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalPlay()">Pause</button>
+        </div>
+        <div class="video-controls-right">
+          <button id="vmMuteBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalMute()">Mute</button>
+          <button id="vmCcBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalCaptions()">CC Off</button>
+          <button id="vmFullscreenBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalFullscreen()">⛶ Full</button>
+        </div>
+      </div>
     </div>
     
   </div>
@@ -1360,6 +1425,9 @@ let vmMuted = false;
 let vmHasCaptions = false;
 let vmCaptionsOn = false;
 let vmLastVolume = 1;
+let vmDuration = 0;
+let vmCurrent = 0;
+let vmSeeking = false;
 
 function setVmButton(id, text, on = false, disabled = false) {
   const el = document.getElementById(id);
@@ -1373,6 +1441,26 @@ function syncVmButtons() {
   setVmButton('vmPlayBtn', vmPaused ? 'Play' : 'Pause', !vmPaused, false);
   setVmButton('vmMuteBtn', vmMuted ? 'Unmute' : 'Mute', !vmMuted, false);
   setVmButton('vmCcBtn', vmCaptionsOn ? 'CC On' : 'CC Off', vmCaptionsOn, !vmHasCaptions);
+  const ccBtn = document.getElementById('vmCcBtn');
+  if (ccBtn) ccBtn.style.display = vmHasCaptions ? 'inline-flex' : 'none';
+}
+
+function fmtTime(sec) {
+  if (!Number.isFinite(sec) || sec < 0) sec = 0;
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  const m = Math.floor((sec / 60) % 60).toString().padStart(2, '0');
+  const h = Math.floor(sec / 3600);
+  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+}
+
+function syncVmProgress() {
+  const progress = document.getElementById('vmProgress');
+  const time = document.getElementById('vmTime');
+  if (!progress || !time) return;
+  const max = vmDuration > 0 ? vmDuration : 100;
+  progress.max = String(max);
+  if (!vmSeeking) progress.value = String(Math.min(vmCurrent, max));
+  time.textContent = `${fmtTime(vmCurrent)} / ${fmtTime(vmDuration)}`;
 }
 
 function isModalFullscreen() {
@@ -1395,6 +1483,15 @@ async function setupVmPlayer() {
 
   vmPlayer.on('play', () => { vmPaused = false; syncVmButtons(); });
   vmPlayer.on('pause', () => { vmPaused = true; syncVmButtons(); });
+  vmPlayer.on('timeupdate', e => {
+    vmCurrent = e && typeof e.seconds === 'number' ? e.seconds : vmCurrent;
+    vmDuration = e && typeof e.duration === 'number' ? e.duration : vmDuration;
+    syncVmProgress();
+  });
+  vmPlayer.on('loaded', e => {
+    vmDuration = e && typeof e.duration === 'number' ? e.duration : vmDuration;
+    syncVmProgress();
+  });
   vmPlayer.on('volumechange', e => {
     vmMuted = !e || e.volume === 0;
     if (e && typeof e.volume === 'number' && e.volume > 0) vmLastVolume = e.volume;
@@ -1408,6 +1505,8 @@ async function setupVmPlayer() {
   try {
     await vmPlayer.ready();
     vmPaused = await vmPlayer.getPaused();
+    vmCurrent = await vmPlayer.getCurrentTime();
+    vmDuration = await vmPlayer.getDuration();
     const v = await vmPlayer.getVolume();
     vmMuted = v === 0;
     if (v > 0) vmLastVolume = v;
@@ -1415,8 +1514,10 @@ async function setupVmPlayer() {
     vmHasCaptions = tracks.length > 0;
     vmCaptionsOn = tracks.some(t => t.mode === 'showing');
     syncVmButtons();
+    syncVmProgress();
   } catch {
     syncVmButtons();
+    syncVmProgress();
   }
 }
 
@@ -1434,7 +1535,11 @@ function openModal(url) {
   vmMuted = false;
   vmHasCaptions = false;
   vmCaptionsOn = false;
+  vmDuration = 0;
+  vmCurrent = 0;
+  vmSeeking = false;
   syncVmButtons();
+  syncVmProgress();
 
   const src = vmIsVimeo
     ? withEmbedParams(url, { autoplay: '1', controls: '0', title: '0', byline: '0', portrait: '0', speed: '0', pip: '0', fullscreen: '0' })
@@ -1457,6 +1562,10 @@ function closeModal() {
     else if (document.msExitFullscreen) document.msExitFullscreen();
   }
   destroyVmPlayer();
+  vmDuration = 0;
+  vmCurrent = 0;
+  vmSeeking = false;
+  syncVmProgress();
   document.getElementById('vmControls').style.display = 'none';
   document.getElementById('modal').style.display = 'none';
   document.getElementById('mFrame').src = '';
@@ -1473,6 +1582,26 @@ function toggleModalFullscreen() {
   if (shell.requestFullscreen) shell.requestFullscreen();
   else if (shell.webkitRequestFullscreen) shell.webkitRequestFullscreen();
   else if (shell.msRequestFullscreen) shell.msRequestFullscreen();
+}
+
+function onVmProgressInput(value) {
+  vmSeeking = true;
+  vmCurrent = Number(value) || 0;
+  syncVmProgress();
+}
+
+async function onVmProgressCommit(value) {
+  if (!vmPlayer) {
+    vmSeeking = false;
+    return;
+  }
+  const t = Math.max(0, Math.min(Number(value) || 0, vmDuration || Number(value) || 0));
+  try {
+    await vmPlayer.setCurrentTime(t);
+    vmCurrent = t;
+  } catch {}
+  vmSeeking = false;
+  syncVmProgress();
 }
 
 async function toggleModalPlay() {
@@ -1597,6 +1726,12 @@ function bindHover() {
   });
 }
 function onEnter() {
+  if (this.classList && this.classList.contains('no-cursor-grow')) {
+    dot.style.transform='translate(-50%,-50%) scale(1)'; dot.style.opacity='1';
+    ring.style.width='32px'; ring.style.height='32px';
+    ring.style.borderColor = document.body.classList.contains('on-game') ? 'var(--g-nepal)' : 'var(--bc)';
+    return;
+  }
   dot.style.transform='translate(-50%,-50%) scale(2.5)'; dot.style.opacity='.5';
   ring.style.width='56px'; ring.style.height='56px';
   if (document.body.classList.contains('on-game')) {
