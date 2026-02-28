@@ -662,7 +662,7 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 .trailer-wrap iframe { width: 100%; height: 100%; border: none; }
 .video-modal-shell {
   position: relative;
-  width: min(92vw, 1280px);
+  width: clamp(375px, 92vw, 1280px);
   aspect-ratio: 16/9;
   max-height: 88vh;
   overflow: hidden;
@@ -823,6 +823,10 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   .home-title { font-size: 48px; }
   .masonry { grid-template-columns: 1fr; }
   .masonry-col:not(:first-child) { display: none; }
+  .video-modal-shell {
+    width: 100vw;
+    max-height: 78vh;
+  }
 }
 </style>
 </head>
