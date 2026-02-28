@@ -704,15 +704,13 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
   z-index: 12;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 10px 12px;
-  background: rgba(0,0,0,.48);
-  border: 1px solid rgba(255,255,255,.08);
+  gap: 8px;
+  padding: 0;
 }
 .video-progress-line {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 .video-progress {
   flex: 1;
@@ -720,7 +718,7 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
   -webkit-appearance: none;
   height: 2px;
   border-radius: 999px;
-  background: rgba(248,246,243,.24);
+  background: rgba(248,246,243,.2);
   outline: none;
   cursor: none;
 }
@@ -761,16 +759,16 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 .video-controls-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 .video-ctrl {
   font-family: 'Space Mono', monospace;
   font-size: 9px;
   letter-spacing: .18em;
-  color: rgba(255,255,255,.8);
+  color: rgba(248,246,243,.82);
   background: transparent;
-  border: 1px solid rgba(255,255,255,.2);
-  padding: 6px 10px;
+  border: 1px solid rgba(248,246,243,.16);
+  padding: 6px 9px;
   text-transform: uppercase;
   cursor: none;
 }
@@ -779,11 +777,55 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
   color: var(--red);
 }
 .video-ctrl:hover {
-  border-color: rgba(248,246,243,.48);
+  border-color: rgba(248,246,243,.42);
   color: #fff;
 }
 .video-ctrl:disabled {
   display: none;
+}
+.video-vol-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(248,246,243,.14);
+}
+.video-vol-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .18em;
+  color: rgba(248,246,243,.75);
+  text-transform: uppercase;
+}
+.video-volume {
+  width: 72px;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 2px;
+  background: rgba(248,246,243,.22);
+  outline: none;
+  cursor: none;
+}
+.video-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  background: var(--red);
+}
+.video-volume::-moz-range-track {
+  height: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(248,246,243,.22);
+}
+.video-volume::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  background: var(--red);
 }
 .trailer-label {
   margin-top: 20px; font-family: 'Space Mono', monospace; font-size: 9px;
@@ -998,8 +1040,10 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
           <button id="vmPlayBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalPlay()">Pause</button>
         </div>
         <div class="video-controls-right">
-          <button id="vmMuteBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalMute()">Mute</button>
-          <button id="vmCcBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalCaptions()">CC Off</button>
+          <label class="video-vol-wrap no-cursor-grow">
+            <span class="video-vol-label">VOL</span>
+            <input id="vmVolume" class="video-volume no-cursor-grow" type="range" min="0" max="1" step="0.01" value="1" oninput="onVmVolumeInput(this.value)">
+          </label>
           <button id="vmFullscreenBtn" class="video-ctrl no-cursor-grow" onclick="toggleModalFullscreen()">⛶ Full</button>
         </div>
       </div>
@@ -1422,12 +1466,11 @@ let vmPlayer = null;
 let vmIsVimeo = false;
 let vmPaused = false;
 let vmMuted = false;
-let vmHasCaptions = false;
-let vmCaptionsOn = false;
 let vmLastVolume = 1;
 let vmDuration = 0;
 let vmCurrent = 0;
 let vmSeeking = false;
+let vmSessionId = 0;
 
 function setVmButton(id, text, on = false, disabled = false) {
   const el = document.getElementById(id);
@@ -1439,10 +1482,8 @@ function setVmButton(id, text, on = false, disabled = false) {
 
 function syncVmButtons() {
   setVmButton('vmPlayBtn', vmPaused ? 'Play' : 'Pause', !vmPaused, false);
-  setVmButton('vmMuteBtn', vmMuted ? 'Unmute' : 'Mute', !vmMuted, false);
-  setVmButton('vmCcBtn', vmCaptionsOn ? 'CC On' : 'CC Off', vmCaptionsOn, !vmHasCaptions);
-  const ccBtn = document.getElementById('vmCcBtn');
-  if (ccBtn) ccBtn.style.display = vmHasCaptions ? 'inline-flex' : 'none';
+  const vol = document.getElementById('vmVolume');
+  if (vol) vol.value = String(vmMuted ? 0 : vmLastVolume);
 }
 
 function fmtTime(sec) {
@@ -1475,49 +1516,50 @@ function syncFullscreenButton() {
   btn.textContent = isModalFullscreen() ? '🗗 RESTORE' : '⛶ FULLSCREEN';
 }
 
-async function setupVmPlayer() {
+async function setupVmPlayer(sessionId) {
   if (!vmIsVimeo || !window.Vimeo || !window.Vimeo.Player) return;
   const frame = document.getElementById('mFrame');
   if (!frame) return;
+  const src = frame.src || '';
+  if (!src.includes('player.vimeo.com/video/')) return;
+
+  let player;
   try {
-    vmPlayer = new window.Vimeo.Player(frame);
+    player = new window.Vimeo.Player(frame);
   } catch {
-    vmPlayer = null;
     return;
   }
+  vmPlayer = player;
 
-  vmPlayer.on('play', () => { vmPaused = false; syncVmButtons(); });
-  vmPlayer.on('pause', () => { vmPaused = true; syncVmButtons(); });
-  vmPlayer.on('timeupdate', e => {
+  player.on('play', () => { vmPaused = false; syncVmButtons(); });
+  player.on('pause', () => { vmPaused = true; syncVmButtons(); });
+  player.on('timeupdate', e => {
     vmCurrent = e && typeof e.seconds === 'number' ? e.seconds : vmCurrent;
     vmDuration = e && typeof e.duration === 'number' ? e.duration : vmDuration;
     syncVmProgress();
   });
-  vmPlayer.on('loaded', e => {
+  player.on('loaded', e => {
     vmDuration = e && typeof e.duration === 'number' ? e.duration : vmDuration;
     syncVmProgress();
   });
-  vmPlayer.on('volumechange', e => {
+  player.on('volumechange', e => {
     vmMuted = !e || e.volume === 0;
     if (e && typeof e.volume === 'number' && e.volume > 0) vmLastVolume = e.volume;
     syncVmButtons();
   });
-  vmPlayer.on('texttrackchange', track => {
-    vmCaptionsOn = !!track;
-    syncVmButtons();
-  });
 
   try {
-    await vmPlayer.ready();
-    vmPaused = await vmPlayer.getPaused();
-    vmCurrent = await vmPlayer.getCurrentTime();
-    vmDuration = await vmPlayer.getDuration();
-    const v = await vmPlayer.getVolume();
+    await player.ready();
+    if (sessionId !== vmSessionId || vmPlayer !== player) {
+      player.destroy().catch(() => {});
+      return;
+    }
+    vmPaused = await player.getPaused();
+    vmCurrent = await player.getCurrentTime();
+    vmDuration = await player.getDuration();
+    const v = await player.getVolume();
     vmMuted = v === 0;
     if (v > 0) vmLastVolume = v;
-    const tracks = await vmPlayer.getTextTracks();
-    vmHasCaptions = tracks.length > 0;
-    vmCaptionsOn = tracks.some(t => t.mode === 'showing');
     syncVmButtons();
     syncVmProgress();
   } catch {
@@ -1536,11 +1578,10 @@ function destroyVmPlayer() {
 
 function openModal(url) {
   if (!url || url.includes('XXXXXXX')) return;
+  vmSessionId++;
   vmIsVimeo = /player\.vimeo\.com\/video\/\d+/.test(url);
   vmPaused = false;
   vmMuted = false;
-  vmHasCaptions = false;
-  vmCaptionsOn = false;
   vmDuration = 0;
   vmCurrent = 0;
   vmSeeking = false;
@@ -1553,11 +1594,9 @@ function openModal(url) {
 
   const frame = document.getElementById('mFrame');
   destroyVmPlayer();
-  frame.onload = () => {
-    if (vmIsVimeo && frame.src.includes('player.vimeo.com/video/')) setupVmPlayer();
-    frame.onload = null;
-  };
+  frame.onload = null;
   frame.src = src;
+  if (vmIsVimeo) setupVmPlayer(vmSessionId);
 
   document.getElementById('vmControls').style.display = vmIsVimeo ? 'flex' : 'none';
   syncFullscreenButton();
@@ -1565,6 +1604,7 @@ function openModal(url) {
   m.style.display = 'flex';
 }
 function closeModal() {
+  vmSessionId++;
   if (isModalFullscreen()) {
     if (document.exitFullscreen) document.exitFullscreen();
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
@@ -1575,12 +1615,16 @@ function closeModal() {
   vmCurrent = 0;
   vmSeeking = false;
   vmIsVimeo = false;
+  vmPaused = false;
+  vmMuted = false;
+  vmLastVolume = 1;
+  syncVmButtons();
   syncVmProgress();
   document.getElementById('vmControls').style.display = 'none';
   document.getElementById('modal').style.display = 'none';
   const frame = document.getElementById('mFrame');
   frame.onload = null;
-  frame.src = 'about:blank';
+  frame.src = '';
 }
 function toggleModalFullscreen() {
   const shell = document.querySelector('#modal .video-modal-shell');
@@ -1624,32 +1668,13 @@ async function toggleModalPlay() {
   } catch {}
 }
 
-async function toggleModalMute() {
+async function onVmVolumeInput(value) {
   if (!vmPlayer) return;
+  const v = Math.max(0, Math.min(1, Number(value) || 0));
   try {
-    if (vmMuted) await vmPlayer.setVolume(vmLastVolume || 1);
-    else {
-      const v = await vmPlayer.getVolume();
-      if (v > 0) vmLastVolume = v;
-      await vmPlayer.setVolume(0);
-    }
-  } catch {}
-}
-
-async function toggleModalCaptions() {
-  if (!vmPlayer || !vmHasCaptions) return;
-  try {
-    if (vmCaptionsOn) {
-      await vmPlayer.disableTextTrack();
-      vmCaptionsOn = false;
-    } else {
-      const tracks = await vmPlayer.getTextTracks();
-      const track = tracks.find(t => t.language === LANG) || tracks[0];
-      if (track) {
-        await vmPlayer.enableTextTrack(track.language);
-        vmCaptionsOn = true;
-      }
-    }
+    await vmPlayer.setVolume(v);
+    vmMuted = v === 0;
+    if (v > 0) vmLastVolume = v;
     syncVmButtons();
   } catch {}
 }
