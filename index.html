@@ -1462,6 +1462,15 @@ function withEmbedParams(rawUrl, extraParams = {}) {
   }
 }
 
+function getVimeoId(url) {
+  if (!url) return null;
+  const m1 = String(url).match(/player\.vimeo\.com\/video\/(\d+)/);
+  if (m1) return m1[1];
+  const m2 = String(url).match(/vimeo\.com\/(\d+)/);
+  if (m2) return m2[1];
+  return null;
+}
+
 let vmPlayer = null;
 let vmIsVimeo = false;
 let vmPaused = false;
@@ -1572,8 +1581,8 @@ function destroyVmPlayer() {
   const player = vmPlayer;
   vmPlayer = null;
   if (!player) return;
+  player.pause().catch(() => {});
   player.unload().catch(() => {});
-  player.destroy().catch(() => {});
 }
 
 function openModal(url) {
@@ -1593,14 +1602,26 @@ function openModal(url) {
     : withEmbedParams(url, { autoplay: '1' });
 
   const frame = document.getElementById('mFrame');
-  destroyVmPlayer();
+  const m = document.getElementById('modal');
+
+  if (vmIsVimeo && vmPlayer) {
+    const nextId = getVimeoId(url);
+    if (nextId) {
+      vmPlayer.loadVideo(nextId).then(() => vmPlayer.play().catch(() => {})).catch(() => {});
+      document.getElementById('vmControls').style.display = 'flex';
+      syncFullscreenButton();
+      m.style.display = 'flex';
+      return;
+    }
+  }
+
+  if (!vmIsVimeo) destroyVmPlayer();
   frame.onload = null;
   frame.src = src;
   if (vmIsVimeo) setupVmPlayer(vmSessionId);
 
   document.getElementById('vmControls').style.display = vmIsVimeo ? 'flex' : 'none';
   syncFullscreenButton();
-  const m = document.getElementById('modal');
   m.style.display = 'flex';
 }
 function closeModal() {
@@ -1610,7 +1631,7 @@ function closeModal() {
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     else if (document.msExitFullscreen) document.msExitFullscreen();
   }
-  destroyVmPlayer();
+  if (vmPlayer) vmPlayer.pause().catch(() => {});
   vmDuration = 0;
   vmCurrent = 0;
   vmSeeking = false;
@@ -1624,7 +1645,6 @@ function closeModal() {
   document.getElementById('modal').style.display = 'none';
   const frame = document.getElementById('mFrame');
   frame.onload = null;
-  frame.src = '';
 }
 function toggleModalFullscreen() {
   const shell = document.querySelector('#modal .video-modal-shell');
