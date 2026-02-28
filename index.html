@@ -713,78 +713,14 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 
 /* Mobile */
 @media (max-width: 768px) {
-  nav {
-    padding: 0 20px;
-  }
+
+  /* ── NAV ── */
+  nav { padding: 0 20px; }
   .nav-links { display: none; }
   .lang-toggle { margin-left: auto; }
-
-  /* Home */
-  .home-wrap {
-    grid-template-columns: 1fr;
-    height: 100svh;
-    grid-template-rows: 1fr auto;
-  }
-  .home-right {
-    order: 1;
-    height: 100%;
-  }
-  .home-left {
-    order: 2;
-    padding: 28px 24px 80px;
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, var(--nebula) 60%, transparent 100%);
-    z-index: 10;
-    justify-content: flex-end;
-  }
-  .home-right::before {
-    background: linear-gradient(to bottom, rgba(220,228,224,.3) 0%, transparent 30%);
-  }
-  .home-title { font-size: clamp(48px, 14vw, 72px); }
-  .home-eyebrow { margin-bottom: 16px; }
-  .home-tagline { font-size: 13px; margin-bottom: 24px; padding-bottom: 24px; }
-  .home-actions { gap: 10px; }
-  .home-meta { left: 24px; bottom: 16px; gap: 24px; display: none; }
-  .hm-stat .n { font-size: 24px; }
-  .poster-info { padding: 20px 20px 24px; }
-  .poster-game-title { font-size: 28px; }
-  .poster-img { width: 100%; height: 100%; }
-
-  /* Work */
-  .work-header { padding: 80px 20px 24px; flex-direction: column; gap: 8px; }
-  .masonry { grid-template-columns: repeat(2, 1fr); gap: 2px; padding: 2px; }
-  .masonry-col { gap: 2px; }
-
-  /* About */
-  .about-grid { grid-template-columns: 1fr; padding: 80px 20px; gap: 40px; }
-  .about-photo { max-height: 260px; object-fit: cover; }
-  .about-stats { grid-template-columns: 1fr 1fr; }
-  .about-bio { max-width: 100%; }
-  .caps-grid { grid-template-columns: 1fr; }
-
-  /* Contact */
-  .contact-grid { grid-template-columns: 1fr; padding: 80px 20px; gap: 40px; }
-  .process-steps { padding: 0; }
-
-  /* Game page */
-  .game-hero { padding: 80px 24px 40px; min-height: auto; }
-  .game-actions { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .game-features { grid-template-columns: 1fr 1fr; gap: 12px; padding: 32px 20px; }
-  .game-art-grid { grid-template-columns: 1fr; padding: 0 20px 40px; }
-  .game-cta { padding: 48px 24px; }
-
-  /* Sections */
-  .sec-title { font-size: clamp(36px, 10vw, 56px); }
-  .page { padding-top: 0; }
-
-  /* Footer */
-  footer { padding: 32px 20px; flex-direction: column; gap: 16px; text-align: center; }
-  .footer-links { justify-content: center; }
-
-  /* Hamburger */
-  .nav-links { display: none; }
   .hamburger { display: flex !important; }
+
+  /* ── MOBILE MENU ── */
   .mobile-menu {
     display: none;
     position: fixed; inset: 0; top: 56px;
@@ -796,7 +732,83 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
     font-family: 'Bebas Neue', sans-serif; font-size: 48px;
     color: var(--bc); text-decoration: none; letter-spacing: .05em;
   }
-  .mobile-menu a:active, .mobile-menu a.active { color: var(--red); }
+  .mobile-menu a.active { color: var(--red); }
+
+  /* ── HOME ── */
+  .home-wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    overflow: hidden;
+  }
+  /* Poster fills top 55% */
+  .home-right {
+    order: 1;
+    flex: 0 0 55%;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-right::before {
+    background: linear-gradient(to bottom, rgba(220,228,224,.2) 0%, transparent 50%);
+  }
+  .poster-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  /* If no poster, show a dark placeholder so space isn't blank */
+  .poster-placeholder { width: 100%; height: 100%; background: linear-gradient(160deg, var(--nebula-dark) 0%, #1a1a2e 100%); position: absolute; inset: 0; }
+  .poster-info { padding: 16px 20px 20px; }
+  .poster-game-title { font-size: 24px; }
+  /* Left content fills bottom 45% */
+  .home-left {
+    order: 2;
+    flex: 1;
+    padding: 24px 24px 20px;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .home-title { font-size: clamp(40px, 12vw, 60px); margin-bottom: 12px; }
+  .home-eyebrow { margin-bottom: 12px; }
+  .home-tagline { font-size: 12px; margin-bottom: 20px; padding-bottom: 20px; }
+  .home-actions { gap: 10px; }
+  .home-actions .btn { padding: 10px 20px; font-size: 11px; }
+  .home-meta { display: none; }
+  /* Film corners hidden on mobile */
+  .film-c { display: none; }
+
+  /* ── WORK ── */
+  .work-header { padding: 70px 16px 20px; flex-direction: column; gap: 6px; }
+  /* Single column on mobile for cleaner look */
+  .masonry { grid-template-columns: 1fr; gap: 3px; padding: 3px; }
+  .masonry-col:not(:first-child) { display: none; }
+  /* Show all items in first column by redistributing via JS */
+
+  /* ── ABOUT ── */
+  .about-wrap { grid-template-columns: 1fr; }
+  .about-l { padding: 70px 20px 40px; border-right: none; border-bottom: 1px solid var(--bc-faint); }
+  .about-r { padding: 40px 20px 60px; }
+  .about-name { font-size: 56px; margin-bottom: 28px; }
+  .about-bio { font-size: 14px; line-height: 1.7; max-width: 100%; }
+  .about-photo { height: 240px; margin-bottom: 28px; }
+  .stats-row { margin-top: 32px; }
+  .stat-cell .big { font-size: 36px; }
+
+  /* ── CONTACT ── */
+  .contact-wrap { grid-template-columns: 1fr; }
+  .contact-l { padding: 70px 20px 40px; border-right: none; border-bottom: 1px solid var(--bc-faint); }
+  .contact-r { padding: 40px 20px 60px; }
+  .contact-title { font-size: 52px; margin-bottom: 28px; }
+  .contact-info { gap: 20px; }
+  .process-section { padding-top: 32px; margin-top: 32px; }
+  .socials-row { margin-top: 24px; }
+
+  /* ── GAME ── */
+  .game-hero { padding: 70px 20px 40px; min-height: auto; }
+  .game-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .game-features { grid-template-columns: 1fr 1fr; gap: 10px; padding: 28px 20px; }
+  .game-art-grid { grid-template-columns: 1fr; padding: 0 20px 40px; gap: 10px; }
+  .game-cta { padding: 40px 20px; }
+
+  /* ── FOOTER ── */
+  footer { padding: 28px 20px; flex-direction: column; gap: 12px; text-align: center; }
+  .footer-links { justify-content: center; flex-wrap: wrap; }
 }
 
 /* Very small phones */
@@ -844,7 +856,7 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
 
 <!-- VIDEO MODAL -->
 <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:20000;align-items:center;justify-content:center;">
-  <div style="position:relative;width:85vw;max-width:1080px;aspect-ratio:16/9;overflow:hidden;border-radius:2px;">
+  <div style="position:relative;width:85vw;max-width:1080px;aspect-ratio:16/9;overflow:hidden;border-radius:2px;transform:translateZ(0);isolation:isolate;">
     <button onclick="closeModal()" style="position:absolute;top:12px;right:12px;z-index:10;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;color:rgba(255,255,255,.7);background:rgba(0,0,0,.5);border:none;cursor:pointer;padding:6px 12px;">✕ CLOSE</button>
     <iframe id="mFrame" src="" style="width:100%;height:100%;border:none;display:block;" allowfullscreen allow="autoplay"></iframe>
   </div>
@@ -963,9 +975,11 @@ function renderWork() {
   };
 
   // Distribute items round-robin across 3 columns so visual order is top-to-bottom
-  // item 1→col0, item 2→col1, item 3→col2, item 4→col0, ...
-  const cols = [[], [], []];
-  D.works.forEach((w, i) => cols[i % 3].push(makeItem(w)));
+  // On mobile, all items go to col0 (other cols hidden via CSS)
+  const isMobile = window.innerWidth <= 768;
+  const numCols = isMobile ? 1 : 3;
+  const cols = Array.from({length: 3}, () => []);
+  D.works.forEach((w, i) => cols[i % numCols].push(makeItem(w)));
   const masonry = cols.map(c => `<div class="masonry-col">${c.join('')}</div>`).join('');
 
   document.getElementById('work').innerHTML = `
