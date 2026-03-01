@@ -249,33 +249,33 @@ body.on-game .lang-btn { color: rgba(144,175,189,.5); }
   position: absolute; bottom: 48px; right: 48px; z-index: 10;
   display: flex; align-items: center; gap: 16px;
   cursor: none; text-decoration: none;
-  background: rgba(12,12,24,.55);
-  border: 1px solid rgba(144,175,189,.2);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(18,12,36,.65);
+  border: 1px solid rgba(144,175,189,.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   padding: 16px 20px 16px 24px;
   transition: background .3s, border-color .3s;
 }
 .home-game-entry:hover {
-  background: rgba(12,12,24,.75);
-  border-color: rgba(144,175,189,.45);
+  background: rgba(18,12,36,.85);
+  border-color: rgba(144,175,189,.5);
 }
 .hge-text { text-align: left; }
 .hge-label {
   font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: .3em;
-  color: rgba(144,175,189,.6); text-transform: uppercase; margin-bottom: 6px;
+  color: var(--g-nepal); text-transform: uppercase; margin-bottom: 6px;
 }
 .hge-title {
   font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .05em;
-  color: var(--white); line-height: 1;
+  color: var(--g-text); line-height: 1;
 }
 .hge-sub {
-  font-size: 10px; color: rgba(255,255,255,.35); letter-spacing: .08em; margin-top: 4px;
+  font-size: 10px; color: rgba(221,232,238,.4); letter-spacing: .08em; margin-top: 4px;
 }
 .hge-arrow {
   width: 36px; height: 36px; border: 1px solid rgba(144,175,189,.3); border-radius: 50%;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  font-size: 14px; color: rgba(144,175,189,.7);
+  font-size: 14px; color: var(--g-nepal);
   transition: all .3s; margin-left: 8px;
 }
 .home-game-entry:hover .hge-arrow {
