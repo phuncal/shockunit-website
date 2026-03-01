@@ -34,7 +34,7 @@ const SITE_DATA = {
     eyebrow:       { en: "Now in Development", zh: "开发中" },
     posterImage:   "images/hero-poster.jpg",
     posterLabel:   { en: "Cyberpunk Visual Novel", zh: "赛博朋克视觉小说" },
-    posterTitle:   { en: "STREAM\nALLIANCE", zh: "直播联盟" },
+    posterTitle:   { en: "STREAMNET\nALLIANCE", zh: "StreamNet联盟" },
     posterSubtitle:{ en: "Coming to Steam", zh: "即将登陆 Steam" },
     steamUrl:      ""
   },
@@ -115,8 +115,8 @@ const SITE_DATA = {
 
   // ─── 游戏落地页 ───────────────────────────────────────────
   game: {
-    titleEn:     "STREAM\nALLIANCE",
-    titleZh:     "直播联盟",
+    titleEn:     "STREAMNET\nALLIANCE",
+    titleZh:     "StreamNet联盟",
     genre:       { en: "Cyberpunk Visual Novel", zh: "赛博朋克视觉小说" },
     tagline:     { en: "In 2048, your life is content.", zh: "2048年，你的人生就是内容。" },
     description: {

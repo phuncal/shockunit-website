@@ -1064,7 +1064,7 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   <div class="trailer-wrap">
     <iframe id="trailerFrame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
   </div>
-  <div class="trailer-label">STREAM ALLIANCE — Official Trailer</div>
+  <div class="trailer-label">STREAMNET ALLIANCE — Official Trailer</div>
 </div>
 
 <!-- VIDEO MODAL -->
@@ -1151,7 +1151,7 @@ function renderNav() {
 function renderHome() {
   const h = D.hero; const s = D.studio;
   const posterContent = h.posterImage
-    ? `<img class="poster-img" src="${h.posterImage}" alt="Stream Alliance">`
+    ? `<img class="poster-img" src="${h.posterImage}" alt="StreamNet Alliance">`
     : `<div class="poster-placeholder"></div>`;
 
   document.getElementById('home').innerHTML = `
@@ -1449,7 +1449,7 @@ function updateOG(id) {
   const base = 'https://shockunit.xyz/';
   let title, desc, image, url;
   if (id === 'game') {
-    title = `STREAM ALLIANCE / 直播联盟 — ${t(g.genre)}`;
+    title = `STREAMNET ALLIANCE / StreamNet联盟 — ${t(g.genre)}`;
     desc  = t(g.tagline);
     image = base + g.heroImage;
     url   = base + '#game';
