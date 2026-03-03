@@ -967,19 +967,69 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   .mobile-menu a.active { color: var(--red); }
 
   /* ── HOME ── */
-  .home-wrap { height: 100svh; }
-  .home-left {
-    padding: 0 24px 100px;
-    max-width: 100%;
+  /* 手机端：海报在上，工作室信息在下，上下分栏 */
+  .home-wrap {
+    height: auto;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
   }
-  .home-title { font-size: clamp(44px, 13vw, 72px); margin-bottom: 14px; }
-  .home-eyebrow { margin-bottom: 14px; font-size: 8px; }
-  .home-tagline { font-size: 11px; margin-bottom: 22px; letter-spacing: .1em; }
+
+  /* 海报占满上半屏 */
+  .home-right {
+    position: relative !important;
+    flex: 0 0 56vw;
+    min-height: 260px;
+    max-height: 56vw;
+  }
+  .poster-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .poster-overlay {
+    background:
+      linear-gradient(to bottom, rgba(12,12,24,.25) 0%, rgba(12,12,24,.15) 60%, rgba(12,12,24,.6) 100%);
+  }
+
+  /* 工作室信息在海报下方，正常流，亮色背景 */
+  .home-left {
+    position: relative !important;
+    background: var(--nebula);
+    padding: 32px 24px 28px;
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+  .home-title {
+    font-size: clamp(44px, 13vw, 68px);
+    color: var(--bc);
+    margin-bottom: 12px;
+  }
+  .home-title em { color: var(--red); }
+  .home-eyebrow {
+    color: var(--red);
+    margin-bottom: 12px; font-size: 8px;
+  }
+  .home-eyebrow::before { background: var(--red); }
+  .home-tagline {
+    color: var(--bc-dim);
+    font-size: 11px; margin-bottom: 24px; letter-spacing: .1em;
+  }
   .home-actions { gap: 10px; }
-  .home-actions .btn { padding: 11px 22px; font-size: 11px; }
+  .home-actions .btn-red { background: var(--red); color: #fff; }
+  .home-actions .btn-out {
+    background: transparent;
+    color: var(--bc);
+    border: 1px solid rgba(56,45,69,.25);
+  }
+
+  /* 游戏入口：在工作室信息下方，独立一块 */
   .home-game-entry {
-    bottom: 24px; right: 20px;
-    gap: 10px;
+    position: relative !important;
+    bottom: auto; right: auto;
+    margin: 16px 24px 32px;
+    align-self: stretch;
+    justify-content: space-between;
   }
   .hge-title { font-size: 17px; }
   .hge-arrow { width: 32px; height: 32px; font-size: 13px; }
@@ -1449,7 +1499,7 @@ function updateOG(id) {
   const base = 'https://shockunit.xyz/';
   let title, desc, image, url;
   if (id === 'game') {
-    title = `STREAMNET ALLIANCE / 直播联盟 — ${t(g.genre)}`;
+    title = `STREAMNET ALLIANCE / StreamNet联盟 — ${t(g.genre)}`;
     desc  = t(g.tagline);
     image = base + g.heroImage;
     url   = base + '#game';
