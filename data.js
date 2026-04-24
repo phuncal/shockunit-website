@@ -35,8 +35,8 @@ const SITE_DATA = {
     posterImage:   "images/hero-poster.jpg",
     posterLabel:   { en: "Cyberpunk Visual Novel", zh: "赛博朋克视觉小说" },
     posterTitle:   { en: "STREAMNET\nALLIANCE", zh: "直播\n联盟" },
-    posterSubtitle:{ en: "Coming to Steam", zh: "即将登陆 Steam" },
-    steamUrl:      ""
+    posterSubtitle:{ en: "Now on Steam", zh: "现已登陆 Steam" },
+    steamUrl:      "https://store.steampowered.com/app/4508630/_/"
   },
 
   // ─── 作品集 ────────────────────────────────────────────────
@@ -120,8 +120,8 @@ const SITE_DATA = {
     genre:       { en: "Cyberpunk Visual Novel", zh: "赛博朋克视觉小说" },
     tagline:     { en: "In 2048, your life is content.", zh: "2048年，你的人生就是内容。" },
     description: {
-      en: "In the city of Dawn Harbor, live streaming is the only ladder out of poverty. You are Hoshino — 17 years old, newly online, chasing the dream of fame. But the closer you climb to the top, the more you feel something is wrong with your own memories.",
-      zh: "在晨曦港，直播是唯一向上的阶梯。你是星野——17岁，刚刚开播，追逐成为顶流的梦想。但爬得越高，你越感觉到自己的记忆里有什么不对。"
+      en: "In the city of Dawn Harbor, live streaming is the only ladder out of poverty. You are Hoshino — 18 years old, newly online, chasing the dream of fame. But the closer you climb to the top, the more you feel something is wrong with your own memories.",
+      zh: "在晨曦港，直播是唯一向上的阶梯。你是星野——18岁，刚刚开播，追逐成为顶流的梦想。但爬得越高，你越感觉到自己的记忆里有什么不对。"
     },
     features: [
       { en: "Branching Narrative", zh: "多线叙事", desc: { en: "Every choice reshapes your story",       zh: "每一个选择都将改写你的命运" } },
@@ -130,9 +130,16 @@ const SITE_DATA = {
       { en: "Moral Complexity",    zh: "道德困境", desc: { en: "No clean answers. No easy way out.",      zh: "没有标准答案，没有轻松出路" } }
     ],
     heroImage:  "images/game/hero.jpg",
-    artImages:  ["images/game/art-1.jpg", "images/game/art-2.jpg", "images/game/art-3.jpg"],
-    steamUrl:   "",
-    trailerUrl: "",   // 预告片链接，支持 YouTube 或 Vimeo 嵌入链接
+    artImages:  [
+      "images/game/art-1.png",
+      "images/game/art-2.png",
+      "images/game/art-3.png",
+      "images/game/art-4.png",
+      "images/game/art-5.png",
+      "images/game/art-6.png"
+    ],
+    steamUrl:   "https://store.steampowered.com/app/4508630/_/",
+    trailerUrl: "https://vimeo.com/1186298212",
     devlog:     ""
   },
 
