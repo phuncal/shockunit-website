@@ -62,7 +62,7 @@
   /* Game page */
   --g-bg:        #0c0c18;
   --g-nepal:     #90AFBD;
-  --g-crimson:   #EB1013;
+  --g-crimson:   #39FF14;
   --g-text:      #dde8ee;
 }
 
@@ -274,18 +274,17 @@ body.on-game .lang-btn { color: rgba(144,175,189,.5); }
 /* Game entry — bottom right corner */
 .home-game-entry {
   position: absolute; bottom: 48px; right: 48px; z-index: 10;
-  display: flex; align-items: center; gap: 16px;
+  display: flex; align-items: center; gap: 20px;
   cursor: none; text-decoration: none;
-  background: rgba(18,12,36,.65);
-  border: 1px solid rgba(144,175,189,.25);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  padding: 16px 20px 16px 24px;
-  transition: background .3s, border-color .3s;
+  background: rgba(12,12,24,.75);
+  border: 1px solid rgba(57,255,20,.35);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: 14px 20px;
+  transition: border-color .3s, background .3s;
 }
 .home-game-entry:hover {
-  background: rgba(18,12,36,.85);
-  border-color: rgba(144,175,189,.5);
+  background: rgba(12,12,24,.92);
+  border-color: rgba(57,255,20,.8);
 }
 .hge-text { text-align: left; }
 .hge-label {
@@ -306,7 +305,7 @@ body.on-game .lang-btn { color: rgba(144,175,189,.5); }
   transition: all .3s; margin-left: 8px;
 }
 .home-game-entry:hover .hge-arrow {
-  border-color: var(--g-nepal); color: var(--white);
+  border-color: var(--g-crimson); color: var(--g-crimson);
   transform: translateX(3px);
 }
 
@@ -347,10 +346,10 @@ body.on-game .lang-btn { color: rgba(144,175,189,.5); }
   display:inline-flex; align-items:center; gap:10px;
   font-family:'Barlow Condensed',sans-serif; font-size:13px;
   font-weight:700; letter-spacing:.15em; text-transform:uppercase;
-  padding:16px 36px; background:var(--g-crimson); color:#fff;
+  padding:16px 36px; background:var(--g-crimson); color:#0c0c18;
   border:none; cursor:none; transition:all .25s; text-decoration:none;
 }
-.btn-steam:hover { background:#ff2a2d; transform:translateY(-2px); box-shadow:0 12px 40px rgba(235,16,19,.3); }
+.btn-steam:hover { background:#5aff1a; transform:translateY(-2px); box-shadow:0 12px 40px rgba(57,255,20,.3); }
 .btn-steam svg { width:20px; height:20px; fill:currentColor; }
 .btn-steam-pending {
   display:inline-flex; align-items:center; gap:10px;
@@ -633,6 +632,14 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
   font-family:'Barlow Condensed',sans-serif; font-size:24px;
   font-weight:600; letter-spacing:.2em; color:var(--g-nepal); margin-bottom:32px;
 }
+.game-logo {
+  max-width:420px; width:100%; margin-bottom:28px;
+  filter:invert(1) hue-rotate(180deg); mix-blend-mode:screen;
+}
+.hge-logo {
+  display:block; max-width:180px; width:100%; margin-bottom:4px;
+  filter:invert(1) hue-rotate(180deg) brightness(2) saturate(1.2); mix-blend-mode:screen;
+}
 .game-tagline {
   font-family:'Barlow Condensed',sans-serif; font-size:22px;
   font-weight:600; letter-spacing:.04em; color:var(--g-crimson); margin-bottom:20px;
@@ -673,7 +680,7 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 .game-cta {
   padding:80px 48px; border-top:1px solid rgba(144,175,189,.1);
   display:flex; align-items:center; justify-content:space-between;
-  background:linear-gradient(to right, rgba(235,16,19,.04), transparent);
+  background:linear-gradient(to right, rgba(57,255,20,.04), transparent);
 }
 .game-cta-text .big { font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--g-text); line-height:1; margin-bottom:8px; }
 .game-cta-text .small { font-size:14px; color:rgba(144,175,189,.6); }
@@ -684,7 +691,7 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 ════════════════════════════════════════ */
 #trailerModal {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.96); z-index: 20001;
+  background: var(--g-bg); z-index: 20001;
   align-items: center; justify-content: center; flex-direction: column;
 }
 #trailerModal.open { display: flex; animation: fadeIn .3s ease; }
@@ -700,7 +707,7 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 .trailer-wrap {
   width: 90vw; max-width: 1280px; aspect-ratio: 16/9; position: relative;
 }
-.trailer-wrap iframe { width: 100%; height: 100%; border: none; }
+.trailer-wrap iframe { width: 100%; height: 100%; border: none; outline: 1px solid rgba(57,255,20,.15); }
 .video-modal-shell {
   --player-bleed: 18px;
   position: relative;
@@ -892,7 +899,7 @@ body.on-game .ft-l, body.on-game .ft-r { color:rgba(144,175,189,.4); }
 }
 .trailer-label {
   margin-top: 20px; font-family: 'Space Mono', monospace; font-size: 9px;
-  letter-spacing: .3em; color: rgba(144,175,189,.25); text-transform: uppercase;
+  letter-spacing: .4em; color: rgba(57,255,20,.35); text-transform: uppercase;
 }
 
 /* Trailer play button */
@@ -1068,6 +1075,8 @@ body.on-game ::-webkit-scrollbar-thumb:hover { background:var(--g-crimson); }
   }
   .game-hero-content { padding: 0 20px 56px; max-width: 100%; }
   .game-title-en { font-size: clamp(44px, 13vw, 72px); }
+  .game-logo { max-width: 280px; margin-bottom: 20px; }
+  .hge-logo { max-width: 140px; }
   .game-scroll-hint { display: none; }
   .game-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
   .game-features { padding: 48px 20px; }
@@ -1239,11 +1248,7 @@ function renderHome() {
 
       <!-- Game entry — bottom right -->
       <a class="home-game-entry" href="#" onclick="navigate('game');return false;">
-        <div class="hge-text">
-          <div class="hge-label">${LANG==='en'?'Now in Development':'正在开发'}</div>
-          <div class="hge-title">${t(h.posterTitle)}</div>
-          <div class="hge-sub">${t(h.posterSubtitle)}</div>
-        </div>
+        <img class="hge-logo" src="images/game/logo.png" alt="${t(h.posterTitle)}">
         <div class="hge-arrow">→</div>
       </a>
 
@@ -1452,8 +1457,7 @@ function renderGame() {
       <div class="scanlines"></div>
       <div class="game-hero-content">
         <div class="game-eyebrow">${t(g.genre)}</div>
-        <div class="game-title-en">${t({en:g.titleEn,zh:g.titleZh})}</div>
-        <div class="game-title-zh">${LANG==='en'?g.titleZh:g.titleEn}</div>
+        <img class="game-logo" src="images/game/logo.png" alt="${g.titleEn}">
         <div class="game-tagline">${t(g.tagline)}</div>
         <div class="game-desc">${t(g.description)}</div>
         <div class="game-actions">
