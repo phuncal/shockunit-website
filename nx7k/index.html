@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>YITH SURPLUS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@300;400&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --or: #C94200;
+            --or-dim: #6b2400;
+            --or-glow: rgba(201,66,0,0.25);
+            --bg: #060402;
+            --bg2: #0c0906;
+            --bg3: #110d08;
+            --text: #b89878;
+            --text-dim: #4a3a2a;
+            --text-faint: #221a12;
+            --line: #1e1408;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* ─── TEXTURE LAYERS ─── */
+        .scanlines {
+            position: fixed; inset: 0; z-index: 900; pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 3px,
+                rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+            );
+        }
+
+        .grain {
+            position: fixed; inset: 0; z-index: 901; pointer-events: none; opacity: 0.35;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        .halftone {
+            position: fixed; inset: 0; z-index: 899; pointer-events: none; opacity: 0.06;
+            background-image: radial-gradient(circle, var(--or) 1px, transparent 1px);
+            background-size: 6px 6px;
+        }
+
+        /* ─── GATE ─── */
+        #gate {
+            position: fixed; inset: 0; z-index: 5000;
+            background: rgba(3,2,1,0.98);
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .gate-inner {
+            width: 90%; max-width: 520px;
+            border: 1px solid var(--or-dim);
+            position: relative;
+            background: var(--bg2);
+        }
+
+        .gate-inner::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: repeating-linear-gradient(90deg, var(--or) 0, var(--or) 6px, transparent 6px, transparent 10px);
+        }
+
+        .gate-stamp {
+            position: absolute;
+            top: -1px; right: 24px;
+            background: var(--or);
+            color: var(--bg);
+            font-size: 9px;
+            letter-spacing: 3px;
+            padding: 3px 10px;
+            font-family: 'Special Elite', serif;
+        }
+
+        .gate-body { padding: 36px 32px 28px; }
+
+        .gate-eyebrow {
+            font-size: 9px; letter-spacing: 5px;
+            color: var(--or-dim); margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .gate-title {
+            font-family: 'Special Elite', serif;
+            font-size: 32px; color: #e8d0b0;
+            letter-spacing: 4px; margin-bottom: 2px;
+            text-shadow: 0 0 30px var(--or-glow);
+        }
+
+        .gate-sub {
+            font-size: 11px; color: var(--text-dim);
+            letter-spacing: 3px; margin-bottom: 28px;
+        }
+
+        .gate-warning {
+            background: rgba(201,66,0,0.04);
+            border-left: 2px solid var(--or-dim);
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            font-size: 11px;
+            line-height: 2.1;
+            color: var(--text);
+        }
+
+        .gate-warning .zh {
+            color: var(--text-dim);
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 10px;
+        }
+
+        .gate-warning em {
+            color: var(--or); font-style: normal;
+        }
+
+        .gate-sep {
+            border: none; border-top: 1px solid var(--line);
+            margin: 14px 0;
+        }
+
+        .gate-check {
+            display: flex; gap: 12px; align-items: flex-start;
+            margin-bottom: 20px; cursor: pointer;
+        }
+
+        .gate-check input {
+            accent-color: var(--or);
+            width: 14px; height: 14px;
+            margin-top: 3px; flex-shrink: 0; cursor: pointer;
+        }
+
+        .gate-check label {
+            font-size: 11px; line-height: 1.9;
+            color: var(--text-dim); cursor: pointer;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        #enter-btn {
+            width: 100%; padding: 13px;
+            background: transparent;
+            border: 1px solid var(--text-faint);
+            color: var(--text-faint);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px; letter-spacing: 5px;
+            cursor: not-allowed; text-transform: uppercase;
+            transition: all 0.4s;
+        }
+
+        #enter-btn.ready {
+            border-color: var(--or); color: var(--or);
+            cursor: pointer;
+            box-shadow: 0 0 24px var(--or-glow), inset 0 0 24px rgba(201,66,0,0.04);
+        }
+
+        #enter-btn.ready:hover {
+            background: rgba(201,66,0,0.08);
+            box-shadow: 0 0 40px var(--or-glow), inset 0 0 40px rgba(201,66,0,0.06);
+        }
+
+        /* ─── MAIN ─── */
+        #main { display: none; max-width: 960px; margin: 0 auto; padding: 0 20px 100px; }
+
+        /* Banner */
+        .banner-wrap {
+            position: relative; margin-bottom: 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .banner-wrap img {
+            width: 100%; display: block;
+            filter: sepia(0.3) contrast(1.05);
+            image-rendering: auto;
+        }
+
+        .banner-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 60%, var(--bg) 100%);
+        }
+
+        /* Header */
+        .site-head {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 20px 0 16px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 32px;
+        }
+
+        .site-name {
+            font-family: 'Special Elite', serif;
+            font-size: 22px; color: #d8c0a0; letter-spacing: 4px;
+        }
+
+        .site-name span { color: var(--or); }
+
+        .site-tagline {
+            font-size: 9px; color: var(--text-dim);
+            letter-spacing: 2px; margin-top: 5px;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .site-meta {
+            text-align: right; font-size: 10px;
+            color: var(--text-dim); line-height: 1.9;
+        }
+
+        .dot {
+            display: inline-block; width: 5px; height: 5px;
+            border-radius: 50%; background: #2a6a2a;
+            margin-right: 5px; vertical-align: middle;
+            animation: heartbeat 2.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.4; transform:scale(0.7); }
+        }
+
+        /* Notice ticker */
+        .ticker-wrap {
+            overflow: hidden; border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 36px; padding: 7px 0;
+            position: relative;
+        }
+
+        .ticker-wrap::before, .ticker-wrap::after {
+            content: ''; position: absolute; top: 0; bottom: 0; width: 40px; z-index: 2;
+        }
+        .ticker-wrap::before { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+        .ticker-wrap::after { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+
+        .ticker {
+            display: inline-flex; gap: 60px;
+            white-space: nowrap;
+            animation: scroll 28s linear infinite;
+            font-size: 10px; color: var(--text-dim); letter-spacing: 2px;
+        }
+
+        .ticker span { color: var(--or); }
+
+        @keyframes scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* Section */
+        .section-head {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .section-label {
+            font-size: 9px; letter-spacing: 5px;
+            color: var(--or); text-transform: uppercase;
+        }
+
+        .section-line {
+            flex: 1; height: 1px; background: var(--line);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1px; background: var(--line);
+            margin-bottom: 48px;
+        }
+
+        .card {
+            background: var(--bg2);
+            padding: 22px 20px 18px;
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .card:hover { background: var(--bg3); }
+
+        .card-cat {
+            font-size: 8px; letter-spacing: 4px;
+            color: var(--or-dim); text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .card-name {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 13px; color: #d8c0a0;
+            line-height: 1.5; margin-bottom: 3px;
+        }
+
+        .card-name-en {
+            font-size: 9px; color: var(--text-dim);
+            letter-spacing: 1px; margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-size: 11px; color: var(--text-dim);
+            line-height: 2; margin-bottom: 18px;
+            font-family: 'Noto Sans SC', sans-serif;
+            border-left: 1px solid var(--line);
+            padding-left: 10px;
+        }
+
+        .card-desc .en {
+            display: block; font-family: 'Share Tech Mono', monospace;
+            font-size: 10px; color: var(--text-faint);
+            margin-top: 4px;
+        }
+
+        .card-foot {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-top: 14px; border-top: 1px solid var(--line);
+        }
+
+        .card-price {
+            font-size: 18px; color: var(--or); letter-spacing: 1px;
+            line-height: 1;
+        }
+
+        .card-price-note {
+            font-size: 9px; color: var(--text-dim);
+            margin-top: 4px; letter-spacing: 1px;
+        }
+
+        .card-stock {
+            font-size: 8px; letter-spacing: 3px;
+            color: #254525; text-transform: uppercase;
+        }
+
+        .card-stock.inquiry { color: var(--or-dim); }
+
+        /* ── SOLD OUT card style ── */
+        .card.sold .card-name,
+        .card.sold .card-desc { opacity: 0.4; }
+        .card.sold .card-stock { color: #4a1a1a; }
+
+        /* Footer */
+        .site-foot {
+            border-top: 1px solid var(--line);
+            padding: 28px 0 0;
+            text-align: center;
+            line-height: 2.6;
+        }
+
+        .foot-mark {
+            font-family: 'Special Elite', serif;
+            font-size: 13px; color: var(--or-dim);
+            letter-spacing: 4px; margin-bottom: 8px;
+        }
+
+        .foot-text {
+            font-size: 10px; color: var(--text-faint);
+            letter-spacing: 2px;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .foot-elder {
+            font-size: 9px; color: var(--text-faint);
+            letter-spacing: 1px; margin-top: 20px;
+            filter: blur(0.4px); opacity: 0.5;
+        }
+
+        /* Blink cursor */
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .cur::after {
+            content:'█'; font-size:0.85em;
+            animation: blink 1.1s step-end infinite;
+            color: var(--or);
+        }
+
+        /* Dashed border accent on some cards */
+        .card-accent::after {
+            content: 'UNVERIFIED / 未认证';
+            position: absolute; top: 12px; right: 12px;
+            font-size: 7px; letter-spacing: 2px;
+            color: var(--or-dim); border: 1px solid var(--or-dim);
+            padding: 2px 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .site-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .gate-body { padding: 28px 20px 22px; }
+            .gate-title { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<div class="grain"></div>
+<div class="halftone"></div>
+
+<!-- ═══ GATE ═══ -->
+<div id="gate">
+    <div class="gate-inner">
+        <div class="gate-stamp">RESTRICTED</div>
+        <div class="gate-body">
+            <div class="gate-eyebrow">// UNREGISTERED EXCHANGE · 非注册交易所 //</div>
+            <div class="gate-title">YITH SURPLUS</div>
+            <div class="gate-sub">依思物资 · 外域分销 · EST. 2041</div>
+
+            <div class="gate-warning">
+                You are accessing an exchange that operates <em>outside the jurisdiction</em> of the StreamNet Alliance and the City of Dawn Harbor.<br>
+                <span class="zh">您正在访问一个运营于直播联盟和晨曦港管辖范围之外的交易所。</span>
+                <hr class="gate-sep">
+                All transactions are unrecorded. All merchandise is unwarranted.<br>
+                <em>All risk is yours.</em><br>
+                <span class="zh">所有交易无记录。所有商品无担保。所有风险，由您承担。</span>
+                <hr class="gate-sep">
+                The outer gods have always been watching.<br>
+                That has not changed.<br>
+                <span class="zh">外神一直在看着。这一点，从未改变。</span>
+            </div>
+
+            <label class="gate-check">
+                <input type="checkbox" id="chk" onchange="toggleBtn()">
+                <label for="chk">
+                    我已阅读并理解以上内容。我选择看见那些无法被抹去的东西。<br>
+                    I choose to see what I cannot unsee.
+                </label>
+            </label>
+
+            <button id="enter-btn" disabled onclick="enterSite()">
+                ENTER THE EXCHANGE · 进入交易所
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+
+    <div class="banner-wrap">
+        <img src="./banner.png" alt="YITH SURPLUS">
+        <div class="banner-overlay"></div>
+    </div>
+
+    <div class="site-head">
+        <div>
+            <div class="site-name">YITH <span>SURPLUS</span></div>
+            <div class="site-tagline">依思物资 · 外域分销 · 晨曦港外环 · EST. 2041</div>
+        </div>
+        <div class="site-meta">
+            <div><span class="dot"></span>ONLINE · 在线</div>
+            <div>NO LOGS · 无日志</div>
+            <div>NO RECORDS · 无记录 <span class="cur"></span></div>
+        </div>
+    </div>
+
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <span>[ NOTICE ]</span> 本站不接受退款 · 本站不回应投诉 · 本站不存在 &nbsp;·&nbsp;
+            <span>[ NOTICE ]</span> NO REFUNDS · NO COMPLAINTS · THIS SITE DOES NOT EXIST &nbsp;·&nbsp;
+            <span>[ NOTICE ]</span> 本站不接受退款 · 本站不回应投诉 · 本站不存在 &nbsp;·&nbsp;
+            <span>[ NOTICE ]</span> NO REFUNDS · NO COMPLAINTS · THIS SITE DOES NOT EXIST &nbsp;·&nbsp;
+        </div>
+    </div>
+
+    <div class="section-head">
+        <div class="section-label">// CATALOG · 商品目录</div>
+        <div class="section-line"></div>
+    </div>
+
+    <div class="grid">
+
+        <div class="card card-accent">
+            <div class="card-cat">AUGMENTATION · 义体强化</div>
+            <div class="card-name">感知增强组件 MK-II</div>
+            <div class="card-name-en">PERCEPTION ENHANCEMENT MODULE MK-II</div>
+            <div class="card-desc">
+                泰坦义体同款规格。来源不作说明。
+                安装无记录，固件不更新，不上报联盟系统。
+                <span class="en">Titan Bionics equivalent spec. Source undisclosed. No installation log. No firmware sync. Off-grid.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">1,800 $CC</div>
+                    <div class="card-price-note">正规报价四分之一 · ¼ of retail</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-cat">AUGMENTATION · 义体强化</div>
+            <div class="card-name">二手力量义体臂</div>
+            <div class="card-name-en">REFURBISHED STRENGTH ARM</div>
+            <div class="card-desc">
+                Grade B 翻新，有使用痕迹，不影响功能。
+                力量输出 +60%。兼容大部分主流接口协议。
+                <span class="en">Grade B refurbished. Cosmetic scarring only. +60% strength output. Broad interface compatibility.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">1,200 $CC</div>
+                    <div class="card-price-note">翻新保障30天 · 30-day functional warranty</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card card-accent">
+            <div class="card-cat">AUGMENTATION · 义体强化</div>
+            <div class="card-name">视觉增强模块（改装版）</div>
+            <div class="card-name-en">VISUAL AUGMENT — MODIFIED</div>
+            <div class="card-desc">
+                夜视、热感成像、人脸识别规避。
+                非标准固件，绕过联盟视觉数据上报协议。
+                <span class="en">Night vision, thermal, facial ID bypass. Non-standard firmware. Bypasses Alliance visual reporting protocol.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">2,200 $CC</div>
+                    <div class="card-price-note">含非授权固件 · incl. unlicensed firmware</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-cat">BROADCAST · 直播设备</div>
+            <div class="card-name">非授权直播增益模块</div>
+            <div class="card-name-en">UNAUTHORIZED STREAM BOOSTER</div>
+            <div class="card-desc">
+                数据指标放大器。联盟无认证。
+                使用风险自担。效果因环境而异。
+                <span class="en">Metric amplifier. Not Alliance-certified. Use at own risk. Results may vary.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">850 $CC</div>
+                    <div class="card-price-note">无效不退款 · non-refundable</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-cat">PHARMACEUTICAL · 药剂</div>
+            <div class="card-name">稳定剂（医用级）</div>
+            <div class="card-name-en">CONSCIOUSNESS STABILIZER — MEDICAL GRADE</div>
+            <div class="card-desc">
+                意识稳定，情绪平复，适量使用。
+                剂量由您自行判断。成瘾性已知。风险自负。
+                <span class="en">Stabilizes consciousness. Use in moderation. Dosage at your discretion. Addiction profile known. Your risk.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">200 $CC</div>
+                    <div class="card-price-note">单支 · per unit</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-cat">DEVICE · 设备</div>
+            <div class="card-name">算力屏蔽器</div>
+            <div class="card-name-en">COMPUTE SHIELD</div>
+            <div class="card-desc">
+                阻断被动算力采集24小时。
+                对抗立天类居住协议有效。不保证对联盟系统生效。
+                <span class="en">Blocks passive compute harvesting for 24h. Effective vs. Litian-type residential protocols. Does not apply to Alliance intranet.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">150 $CC</div>
+                    <div class="card-price-note">单次24h · 24h per use</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-cat">DEVICE · 设备</div>
+            <div class="card-name">身份扰码器</div>
+            <div class="card-name-en">BIOMETRIC SCRAMBLER</div>
+            <div class="card-desc">
+                掩盖生物识别特征，对抗公共摄像网络。
+                有效范围6小时。不适用于联盟内部系统。
+                <span class="en">Masks biometric signature vs. public camera networks. 6h effective range. Not for Alliance intranet use.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">500 $CC</div>
+                    <div class="card-price-note">单次6h · 6h per use</div>
+                </div>
+                <div class="card-stock">IN STOCK</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-cat">INTELLIGENCE · 情报</div>
+            <div class="card-name">定制情报服务</div>
+            <div class="card-name-en">CUSTOM INTELLIGENCE — ON REQUEST</div>
+            <div class="card-desc">
+                内容待询。价格面议。
+                部分订单不接受，原因不作说明。
+                <span class="en">Content on inquiry. Price negotiable. Some requests declined without explanation.</span>
+            </div>
+            <div class="card-foot">
+                <div>
+                    <div class="card-price">— $CC</div>
+                    <div class="card-price-note">价格面议 · quote on request</div>
+                </div>
+                <div class="card-stock inquiry">INQUIRY ONLY</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="site-foot">
+        <div class="foot-mark">// YOU WERE NEVER HERE · 你从未来过此处 //</div>
+        <div class="foot-text">
+            YITH SURPLUS · 依思物资 · EST. 2041 · DAWN HARBOR OUTER RING<br>
+            This page does not exist. These goods do not exist. This transaction will not be recorded.<br>
+            本页不存在。这些商品不存在。这笔交易不会被记录。
+        </div>
+        <div class="foot-elder">Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn</div>
+    </div>
+
+</div>
+
+<script>
+    function toggleBtn() {
+        const btn = document.getElementById('enter-btn');
+        btn.classList.toggle('ready', document.getElementById('chk').checked);
+        btn.disabled = !document.getElementById('chk').checked;
+    }
+
+    function enterSite() {
+        const gate = document.getElementById('gate');
+        gate.style.opacity = '0';
+        setTimeout(() => {
+            gate.style.display = 'none';
+            document.getElementById('main').style.display = 'block';
+        }, 800);
+    }
+</script>
+</body>
+</html>
