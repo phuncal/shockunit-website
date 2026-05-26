@@ -131,8 +131,20 @@ const SITE_DATA = {
     ],
     heroImage:  "images/game/hero.jpg",
     artImages: {
-      en: Array.from({length:15}, (_,i) => `images/game/art-en-${i+1}.png`),
-      zh: Array.from({length:14}, (_,i) => `images/game/art-zh-${i+1}.png`)
+      en: [
+        "images/game/art-en-1.png","images/game/art-en-2.png","images/game/art-en-3.png",
+        "images/game/art-en-4.png","images/game/art-en-5.png","images/game/art-en-6.png",
+        "images/game/art-en-7.png","images/game/art-en-8.png","images/game/art-en-9.png",
+        "images/game/art-en-10.png","images/game/art-en-11.png","images/game/art-en-12.png",
+        "images/game/art-en-13.png","images/game/art-en-14.png","images/game/art-en-15.png"
+      ],
+      zh: [
+        "images/game/art-zh-1.png","images/game/art-zh-2.png","images/game/art-zh-3.png",
+        "images/game/art-zh-4.png","images/game/art-zh-5.png","images/game/art-zh-6.png",
+        "images/game/art-zh-7.png","images/game/art-zh-8.png","images/game/art-zh-9.png",
+        "images/game/art-zh-10.png","images/game/art-zh-11.png","images/game/art-zh-12.png",
+        "images/game/art-zh-13.png","images/game/art-zh-14.png"
+      ]
     },
     steamUrl:   "https://store.steampowered.com/app/4508630/_/",
     trailerUrl: "https://vimeo.com/1186298212",
