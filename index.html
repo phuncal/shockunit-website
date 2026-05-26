@@ -1441,11 +1441,12 @@ function renderGame() {
       <div class="gf-desc">${t(f.desc)}</div>
     </div>`).join('');
 
-  const artItems = g.artImages.map((img, i) =>
+  const artList = Array.isArray(g.artImages) ? g.artImages : (g.artImages[LANG] || g.artImages.en);
+  const artItems = artList.map((img, i) =>
     `<div class="ga-item"><img class="ga-img" src="${img}" alt="Art ${i+1}" onerror="this.parentElement.style.display='none'"></div>`
   ).join('');
 
-  const artGrid = g.artImages.length
+  const artGrid = artList.length
     ? `<div class="game-art-grid">${artItems}</div>`
     : `<div style="height:300px;background:rgba(144,175,189,.04);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.3em;color:rgba(144,175,189,.2);">ADD CONCEPT ART → images/game/</div>`;
 

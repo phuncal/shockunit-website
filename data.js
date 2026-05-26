@@ -130,14 +130,10 @@ const SITE_DATA = {
       { en: "Moral Complexity",    zh: "道德困境", desc: { en: "No clean answers. No easy way out.",      zh: "没有标准答案，没有轻松出路" } }
     ],
     heroImage:  "images/game/hero.jpg",
-    artImages:  [
-      "images/game/art-1.png",
-      "images/game/art-2.png",
-      "images/game/art-3.png",
-      "images/game/art-4.png",
-      "images/game/art-5.png",
-      "images/game/art-6.png"
-    ],
+    artImages: {
+      en: Array.from({length:15}, (_,i) => `images/game/art-en-${i+1}.png`),
+      zh: Array.from({length:14}, (_,i) => `images/game/art-zh-${i+1}.png`)
+    },
     steamUrl:   "https://store.steampowered.com/app/4508630/_/",
     trailerUrl: "https://vimeo.com/1186298212",
     devlog:     ""
